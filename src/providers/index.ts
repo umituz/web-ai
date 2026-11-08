@@ -128,3 +128,44 @@ export type {
   PrunaPredictionResponse,
   PrunaOutput,
 } from "./pruna/client";
+
+export { createOpenAiEmbeddingsAdapter } from "./embeddings/openai-embeddings";
+export type {
+  EmbeddingsRequest,
+  EmbeddingsResult,
+  EmbeddingsAdapter,
+  OpenAiCompatibleConfig,
+} from "./embeddings/openai-embeddings";
+
+export { createOpenAiAudioTranscriptionAdapter } from "./audio/audio-transcription";
+export type {
+  AudioTranscriptionRequest,
+  AudioTranscriptionResult,
+  AudioTranscriptionAdapter,
+} from "./audio/audio-transcription";
+
+export {
+  createOpenAiSpeechAdapter,
+  SPEECH_VOICES,
+  SPEECH_INPUT_MAX,
+} from "./audio/speech-synthesis";
+export type {
+  SpeechVoice,
+  SpeechRequest,
+  SpeechResult,
+  SpeechAdapter,
+} from "./audio/speech-synthesis";
+
+export {
+  createOpenAiImageAdapter,
+  IMAGE_SIZES,
+  IMAGE_QUALITIES,
+  IMAGE_B64_LIMIT,
+} from "./images/openai-images";
+export type {
+  ImageRequest,
+  ImageResult,
+  ImageAdapter,
+  ImageSize,
+  ImageQuality,
+} from "./images/openai-images";

@@ -18,3 +18,10 @@ export {
   clampScore,
   oneOfCatalog,
 } from "./coercion.util";
+export {
+  canFailover,
+  failoverCandidate,
+  isTransientError,
+  TRANSIENT_ERROR_CODES,
+} from "./failover";
+export type { FailoverErrorLike, ModelWithProvider } from "./failover";

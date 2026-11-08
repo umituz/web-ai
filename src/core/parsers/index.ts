@@ -17,3 +17,10 @@ export {
   repairCommonJsonDefects,
 } from "./json-content-extractor";
 export { StructuredPromptBuilder } from "./structured-prompt.builder";
+export {
+  chunkText,
+  CHUNK_MAX_CHARS,
+  CHUNK_OVERLAP_CHARS,
+  CHUNK_TEXT_LIMIT,
+} from "./chunker";
+export type { ChunkOptions } from "./chunker";

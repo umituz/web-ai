@@ -16,3 +16,27 @@ export {
   isWithinWindow,
 } from "./timing-window";
 export type { LeadingEdgeParams, TrailingDelayParams } from "./timing-window";
+
+export {
+  computeCostMicros,
+  buildUsageData,
+  formatCost,
+  MICROS_PER_UNIT,
+} from "./usage-cost";
+export type {
+  ModelPricing,
+  UsageRecordInput,
+  UsageRecordData,
+} from "./usage-cost";
+
+export {
+  nextAttemptDelayMs,
+  canStartTask,
+  planTaskFailure,
+  DEFAULT_TASK_POLICIES,
+} from "./task-policy";
+export type {
+  TaskPolicy,
+  TaskState,
+  TaskPlan,
+} from "./task-policy";

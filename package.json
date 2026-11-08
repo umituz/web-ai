@@ -1,6 +1,6 @@
 {
   "name": "@umituz/web-ai",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Provider-agnostic AI engine for web and edge — text, chat, structured output and streaming over swappable providers (Anthropic, Groq, Gemini, fal, Pruna), plus a content generation suite",
   "type": "module",
   "main": "./dist/index.cjs",
