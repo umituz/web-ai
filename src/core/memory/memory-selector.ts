@@ -1,3 +1,5 @@
+import { capText } from '../parsers/text-extract';
+
 export const MEMORY_MAX_ITEMS = 20;
 export const MEMORY_TOTAL_LIMIT = 4_000;
 
@@ -14,15 +16,11 @@ function resolveTimestamp(value: Date | string | number): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-function truncateString(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str;
-  return str.slice(0, Math.max(maxLength, 0));
-}
-
 export function selectMemories(
   rows: readonly MemoryLike[],
   maxItems: number = MEMORY_MAX_ITEMS,
   totalLimit: number = MEMORY_TOTAL_LIMIT,
+  capper: (text: string, limit: number) => string = capText,
 ): string[] {
   const ordered = [...rows].sort((a, b) => {
     if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
@@ -35,7 +33,7 @@ export function selectMemories(
     if (out.length >= maxItems || used >= totalLimit) break;
     const content = row.content.trim();
     if (content.length === 0) continue;
-    const capped = truncateString(content, totalLimit - used);
+    const capped = capper(content, totalLimit - used);
     out.push(capped);
     used += capped.length;
   }

@@ -35,7 +35,7 @@ describe('selectMemories', () => {
     expect(out).toHaveLength(3);
   });
 
-  it('respects totalLimit character ceiling', () => {
+  it('respects totalLimit character ceiling and marks truncated tail', () => {
     const rows: MemoryLike[] = [
       { content: 'a'.repeat(30), pinned: true, updatedAt: baseDate },
       { content: 'b'.repeat(30), pinned: false, updatedAt: baseDate },
@@ -43,7 +43,8 @@ describe('selectMemories', () => {
     const out = selectMemories(rows, 10, 45);
     expect(out).toHaveLength(2);
     expect(out[0]).toBe('a'.repeat(30));
-    expect(out[1]).toBe('b'.repeat(15));
+    expect(out[1].startsWith('b'.repeat(15))).toBe(true);
+    expect(out[1].endsWith('[truncated]')).toBe(true);
   });
 
   it('ignores blank memories', () => {
