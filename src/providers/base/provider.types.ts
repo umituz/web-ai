@@ -62,6 +62,7 @@ export interface IMediaProvider extends IProviderBase {
 }
 
 export type AnyProvider = ITextProvider | IMediaProvider;
+export type IAIProvider = AnyProvider;
 
 export function isTextProvider(provider: AnyProvider): provider is ITextProvider {
   return provider.capabilities.includes("text");

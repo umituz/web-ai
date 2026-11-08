@@ -5,12 +5,13 @@ export type {
   ITextProvider,
   IMediaProvider,
   AnyProvider,
+  IAIProvider,
 } from "./base/provider.types";
 export { isTextProvider, isMediaProvider } from "./base/provider.types";
-export { BaseProvider, ProviderError } from "./base/base.provider";
+export { BaseProvider, BaseAIProvider, ProviderError } from "./base/base.provider";
 export type { BaseProviderConfig } from "./base/base.provider";
 
-export { ProviderFactory } from "./factory/provider.factory";
+export { ProviderFactory, createProviderFactory } from "./factory/provider.factory";
 export type { ProviderFactoryConfig } from "./factory/provider.factory";
 export { createAI } from "./factory/create-ai";
 export type { AIProviderConfig } from "./factory/create-ai";
@@ -34,7 +35,7 @@ export type {
   AnthropicStopReason,
 } from "./anthropic/anthropic.entities";
 
-export { GroqProvider, toGroqMessages } from "./groq/groq.provider";
+export { GroqProvider, createGroqProvider, toGroqMessages } from "./groq/groq.provider";
 export {
   GROQ_MODELS,
   GROQ_TIERS,

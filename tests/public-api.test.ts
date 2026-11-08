@@ -22,7 +22,7 @@ const typeOnlyExports: {
 } = { conversationMessage: null, chatDomainMessage: null, contentResult: null };
 
 /**
- * Contract test over the 7-entry exports map. Written from the barrels'
+ * Contract test over the exports map. Written from the barrels'
  * actual output: if a public symbol is renamed or dropped, this file fails
  * before a publish ships a breaking change unannounced.
  */
@@ -37,23 +37,51 @@ describe("public API — @umituz/web-ai", () => {
   it("root stays React-free and Workers-safe (no react import anywhere in the graph)", async () => {
     const rootSource = JSON.stringify(Object.keys(root));
     expect(rootSource).not.toContain("useChat");
+    expect(rootSource).not.toContain("useAIContent");
+    expect(rootSource).not.toContain("useAIGeneration");
     expect(rootSource).toContain("createAI");
     // The only entry allowed to touch React is ./hooks.
     expect(() => import("../src/hooks")).not.toThrow();
   });
 
-  it("root: composition root + unified result types", () => {
+  it("root: composition root + unified result types + content layer", () => {
     expectExports(root, [
       "createAI",
       "ProviderFactory",
+      "createProviderFactory",
       "AIError",
       "AIErrorType",
       "GroqProvider",
+      "createGroqProvider",
       "AnthropicProvider",
       "GeminiProvider",
+      "createGeminiProvider",
       "FalProvider",
+      "createFalProvider",
+      "PrunaProvider",
+      "createPrunaProvider",
       "resolveModel",
       "isTextTier",
+      "AIContentService",
+      "BlogService",
+      "SocialService",
+      "VideoScriptService",
+      "AnalysisService",
+      "SeoService",
+      "ABTestService",
+      "ImagePromptService",
+      "ContentCalendarService",
+      "MediaGenerationService",
+      "GenerationExecutor",
+      "PromptBuilder",
+      "calculateCreditCost",
+      "GENERATION_COSTS",
+      "CONTENT_WIZARD_STEPS",
+      "buildContentRequest",
+      "IMAGE_WIZARD_STEPS",
+      "buildImageRequest",
+      "VIDEO_WIZARD_STEPS",
+      "buildVideoRequest",
     ]);
     // Chat's conversation-level ChatMessage is aliased as ConversationMessage;
     // type-only, so its presence is pinned by the typeOnlyExports annotation.
@@ -80,15 +108,22 @@ describe("public API — @umituz/web-ai", () => {
     ]);
   });
 
-  it("providers: factory + every provider class", () => {
+  it("providers: factory + every provider class + creators", () => {
     expectExports(providers, [
       "createAI",
       "ProviderFactory",
+      "createProviderFactory",
       "GroqProvider",
+      "createGroqProvider",
       "AnthropicProvider",
       "GeminiProvider",
+      "createGeminiProvider",
       "FalProvider",
+      "createFalProvider",
       "PrunaProvider",
+      "createPrunaProvider",
+      "BaseProvider",
+      "BaseAIProvider",
       "isTextProvider",
       "isMediaProvider",
     ]);
@@ -99,17 +134,48 @@ describe("public API — @umituz/web-ai", () => {
     expect(typeOnlyExports.chatDomainMessage).toBeNull();
   });
 
-  it("content: domain + 9 services + PromptBuilder + GenerationExecutor", () => {
-    expectExports(content, ["AIContentService", "GenerationExecutor", "PromptBuilder"]);
+  it("content: domain + 10 services + PromptBuilder + GenerationExecutor + wizards", () => {
+    expectExports(content, [
+      "AIContentService",
+      "BlogService",
+      "SocialService",
+      "VideoScriptService",
+      "AnalysisService",
+      "SeoService",
+      "ABTestService",
+      "ImagePromptService",
+      "ContentCalendarService",
+      "MediaGenerationService",
+      "GenerationExecutor",
+      "PromptBuilder",
+      "calculateCreditCost",
+      "GENERATION_COSTS",
+      "CONTENT_WIZARD_STEPS",
+      "buildContentRequest",
+      "IMAGE_WIZARD_STEPS",
+      "buildImageRequest",
+      "VIDEO_WIZARD_STEPS",
+      "buildVideoRequest",
+      "TextModelDefaults",
+      "ModelDefaults",
+    ]);
     expect(typeOnlyExports.contentResult).toBeNull();
   });
 
   it("wizard: content flows", () => {
     expect(wizard).toBeDefined();
     expect(Object.keys(wizard).length).toBeGreaterThan(0);
+    expectExports(wizard, [
+      "CONTENT_WIZARD_STEPS",
+      "buildContentRequest",
+      "IMAGE_WIZARD_STEPS",
+      "buildImageRequest",
+      "VIDEO_WIZARD_STEPS",
+      "buildVideoRequest",
+    ]);
   });
 
-  it("hooks: the only React entry", () => {
+  it("hooks: the only React entry, with content & pruna helpers", () => {
     expectExports(hooks, [
       "useChat",
       "useText",
@@ -120,12 +186,16 @@ describe("public API — @umituz/web-ai", () => {
       "useBlogGenerator",
       "useSocialContentGenerator",
       "useContentWizard",
+      "useImageWizard",
+      "useVideoWizard",
       "usePrunaGeneration",
       "usePrunaProxy",
+      "calculateCreditCost",
+      "GENERATION_COSTS",
     ]);
   });
 
-  it("exports map: code entries + package.json, hooks isolated from the root", async () => {
+  it("exports map: code entries + aliases + package.json, hooks isolated from the root", async () => {
     const packageJson = (await import("../package.json", { with: { type: "json" } })).default;
     const entries = Object.keys(packageJson.exports);
     expect(entries.sort()).toEqual(
@@ -138,9 +208,22 @@ describe("public API — @umituz/web-ai", () => {
         "./chat",
         "./content",
         "./wizard",
+        "./domain",
+        "./application",
+        "./presentation",
         "./hooks",
         "./package.json",
       ].sort(),
     );
+  });
+
+  it("error taxonomy exports are stable", async () => {
+    const errors = await import("../src/content/domain/errors/AIErrors");
+    expect(Object.keys(errors).sort()).toEqual([
+      "AIError",
+      "ProviderQuotaExhaustedError",
+      "ProviderUnavailableError",
+      "ValidationError",
+    ]);
   });
 });

@@ -253,6 +253,10 @@ export function toGroqMessages(
   return wire;
 }
 
+export function createGroqProvider(config: GroqProviderConfig): GroqProvider {
+  return new GroqProvider(config);
+}
+
 function findLastIndex<T>(items: ReadonlyArray<T>, predicate: (item: T) => boolean): number {
   for (let i = items.length - 1; i >= 0; i--) {
     if (predicate(items[i])) return i;

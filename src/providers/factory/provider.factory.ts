@@ -368,3 +368,7 @@ export class ProviderFactory implements ITextGenerator {
     );
   }
 }
+
+export function createProviderFactory(config?: ProviderFactoryConfig): ProviderFactory {
+  return new ProviderFactory(config);
+}

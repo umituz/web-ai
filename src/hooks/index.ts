@@ -16,3 +16,19 @@ export * from './use-groq.hook';
 export * from './usePrunaGeneration';
 export * from './usePrunaProxy';
 export * from './use-async-action';
+
+// Generation calculations and types for React UI components
+export { calculateCreditCost, GENERATION_COSTS } from '../content/domain/types/GenerationTypes';
+export type {
+  GenerationType,
+  ImageQuality,
+  VideoQuality,
+  AspectRatio,
+  GenerationStatus,
+  ImageGenerationInput,
+  VideoGenerationInput,
+  GenerationResult,
+  GenerationMetadata,
+  GenerationProgress,
+  CreditCost,
+} from '../content/domain/types/GenerationTypes';

@@ -72,6 +72,8 @@ export abstract class BaseProvider {
   }
 }
 
+export { BaseProvider as BaseAIProvider };
+
 export class ProviderError extends AIError {
   constructor(
     message: string,

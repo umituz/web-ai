@@ -1,107 +1,12 @@
 /**
  * Content-generation layer ported from web-ai-content: the pure domain, the
- * nine application services, PromptBuilder, and the GenerationExecutor seam.
- * Wizards live in the `./wizard` entry, React hooks in `./hooks`.
+ * nine application services, PromptBuilder, GenerationExecutor seam, and wizards.
+ * Wizards also live in the `./wizard` entry, React hooks in `./hooks`.
  */
 
-export type {
-  SocialPlatform,
-  ContentTone,
-  ContentType,
-  Emotion,
-  Sentiment,
-  BlogType,
-  PlatformSpecs,
-  PLATFORM_SPECS,
-} from './domain/types';
-export type {
-  ProviderConfig,
-  ProviderHealth,
-  ProviderType,
-  BaseProviderConfig,
-  AnthropicConfig,
-  GroqConfig,
-  FalConfig,
-  PrunaConfig,
-  GeminiConfig,
-  GenerationRequest,
-  TextGenerationRequest,
-  ImageGenerationRequest,
-  VideoGenerationRequest,
-  ImageToVideoRequest,
-  VideoToVideoRequest,
-  GeneratedContent,
-} from './domain/config/ProviderConfig';
-
-export type {
-  GenerationType,
-  ImageQuality,
-  VideoQuality,
-  AspectRatio,
-  GenerationStatus,
-  ImageGenerationInput,
-  VideoGenerationInput,
-  GenerationResult as ContentGenerationResult,
-  GenerationMetadata,
-  GenerationProgress,
-  CreditCost,
-} from './domain/types/GenerationTypes';
-export { GENERATION_COSTS, calculateCreditCost } from './domain/types/GenerationTypes';
-
-export {
-  ASPECT_RATIO_VALUES,
-  IMAGE_QUALITY_VALUES,
-  VIDEO_QUALITY_VALUES,
-  VIDEO_DURATION_OPTIONS,
-  MOTION_OPTIONS,
-  STYLE_PRESETS,
-  getDimensionsForAspectRatio,
-  getRecommendedQuality,
-} from './domain/constants/GenerationConstants';
-export {
-  ASPECT_RATIO_OPTIONS,
-  IMAGE_QUALITY_OPTIONS,
-  VIDEO_QUALITY_OPTIONS,
-  VIDEO_DURATION_OPTIONS_SECONDS,
-} from './domain/limits/ImageFormatOptions';
-
-export type {
-  BlogGenerationRequest,
-  GeneratedBlog,
-  SocialContentRequest,
-  GeneratedSocialContent,
-  VideoScriptRequest,
-  GeneratedVideoScript,
-  ContentCalendarEntry,
-} from './domain/entities/ContentGeneration';
-export type {
-  ContentAnalysisRequest,
-  ContentAnalysisResult,
-  SentimentAnalysisResult,
-} from './domain/entities/SentimentAnalysis';
-export type {
-  SEOOptimizationRequest,
-  SEOOptimizationResult,
-  SEOScoreBreakdown,
-  KeywordAnalysis,
-} from './domain/entities/SEO';
-export type {
-  ABTestRequest,
-  ABTestPrediction,
-  ABTestComparison,
-  ABTestVariant,
-} from './domain/entities/ABTesting';
-
+export * from './domain';
 export type { IAIContentService } from './domain/interfaces/IAIContentService';
-export type { ITextGenerator, TextGenerationOptions } from './domain/interfaces/ITextGenerator';
-
-export {
-  AIError,
-  ValidationError,
-  ProviderUnavailableError,
-  ProviderQuotaExhaustedError,
-} from './domain/errors/AIErrors';
-export type { AIErrorCode } from './domain/errors/AIErrors';
+export type { GenerationResult as ContentGenerationResult } from './domain/types/GenerationTypes';
 
 export { AIContentService } from './application/services/AIContentService';
 export { BlogService } from './application/services/BlogService';
@@ -115,4 +20,33 @@ export { ContentCalendarService } from './application/services/ContentCalendarSe
 export { MediaGenerationService } from './application/services/ProviderServices';
 export { GenerationExecutor } from './application/services/GenerationExecutor';
 
-export { PromptBuilder } from './application/prompts/PromptBuilder';
+export * from './application/prompts';
+
+// Wizard orchestration re-exports
+export type { WizardStep, WizardConfig, WizardData, ValidationResult } from '../wizard/base.wizard';
+export type {
+  ContentWizardStep,
+  ContentWizardData,
+  ContentType as ContentWizardType,
+} from '../wizard/content.wizard';
+export {
+  CONTENT_WIZARD_STEPS,
+  buildContentRequest,
+} from '../wizard/content.wizard';
+export type {
+  ImageWizardStep,
+  ImageWizardData,
+} from '../wizard/image.wizard';
+export {
+  IMAGE_WIZARD_STEPS,
+  buildImageRequest,
+} from '../wizard/image.wizard';
+export type {
+  VideoWizardStep,
+  VideoWizardData,
+  VideoGenerationType,
+} from '../wizard/video.wizard';
+export {
+  VIDEO_WIZARD_STEPS,
+  buildVideoRequest,
+} from '../wizard/video.wizard';
