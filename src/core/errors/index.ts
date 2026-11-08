@@ -21,3 +21,12 @@ export {
   describeAIErrorType,
 } from "./response-error-message-extractor";
 export type { AIErrorBody } from "./response-error-message-extractor";
+export {
+  AiError,
+  aiErrorMessage,
+  errorFromStatus,
+  errorFromUnknown,
+  STATUS_TO_CODE,
+  CODE_MESSAGES,
+} from "./unified-ai-error";
+export type { AiErrorCode, ProviderErrorShape } from "./unified-ai-error";
