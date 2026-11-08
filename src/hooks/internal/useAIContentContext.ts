@@ -34,6 +34,9 @@ export type ContentServiceConfig = AIProviderConfig | ProviderConfig | ITextGene
 
 export interface UseAIContentContextOptions {
   config?: ContentServiceConfig;
+  providers?: ProviderConfig;
+  apiKey?: string;
+  model?: string;
   callbacks?: AIOptionCallbacks;
 }
 
@@ -43,7 +46,7 @@ export interface UseAIContentContextReturn {
 }
 
 export function useAIContentContext(options: UseAIContentContextOptions): UseAIContentContextReturn {
-  const { config, callbacks } = options;
+  const { config, providers, apiKey, model, callbacks } = options;
 
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -69,8 +72,14 @@ export function useAIContentContext(options: UseAIContentContextOptions): UseAIC
     if (config) {
       return new AIContentService(config);
     }
-    throw new Error('A provider config (or custom ITextGenerator) must be provided to useAIContent');
-  }, [config]);
+    if (providers) {
+      return new AIContentService(providers);
+    }
+    if (apiKey) {
+      return new AIContentService(apiKey, model);
+    }
+    throw new Error('A provider config, providers object, or apiKey must be provided to useAIContent');
+  }, [config, providers, apiKey, model]);
 
   const reportProgress = useCallback((value: number) => {
     if (mountedRef.current) setProgress(value);

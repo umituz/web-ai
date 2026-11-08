@@ -117,8 +117,53 @@ function toAIProviderConfig(config: AIProviderConfig | ProviderConfig): AIProvid
 }
 
 const buildServices = (
-  configOrGenerator: AIProviderConfig | ProviderConfig | ITextGenerator,
+  configOrGenerator: AIProviderConfig | ProviderConfig | ITextGenerator | string,
+  model?: string,
+  customGenerator?: ITextGenerator,
 ): ServiceBundle => {
+  if (customGenerator) {
+    const executor = new GenerationExecutor(customGenerator);
+    const emptyFactory = new ProviderFactory({
+      priority: [],
+      fallbackEnabled: false,
+    });
+    return {
+      providerFactory: emptyFactory,
+      blogService: new BlogService(executor),
+      socialService: new SocialService(executor),
+      videoScriptService: new VideoScriptService(executor),
+      analysisService: new AnalysisService(executor),
+      seoService: new SeoService(executor),
+      abTestService: new ABTestService(executor),
+      imagePromptService: new ImagePromptService(executor),
+      contentCalendarService: new ContentCalendarService(executor),
+      mediaGenerationService: new MediaGenerationService(emptyFactory),
+    };
+  }
+
+  if (typeof configOrGenerator === 'string') {
+    const aiConfig: AIProviderConfig = {
+      anthropic: {
+        apiKey: configOrGenerator,
+        ...(model ? { models: { balanced: model } } : {}),
+      },
+    };
+    const factory = createAI(aiConfig);
+    const executor = new GenerationExecutor(factory);
+    return {
+      providerFactory: factory,
+      blogService: new BlogService(executor),
+      socialService: new SocialService(executor),
+      videoScriptService: new VideoScriptService(executor),
+      analysisService: new AnalysisService(executor),
+      seoService: new SeoService(executor),
+      abTestService: new ABTestService(executor),
+      imagePromptService: new ImagePromptService(executor),
+      contentCalendarService: new ContentCalendarService(executor),
+      mediaGenerationService: new MediaGenerationService(factory),
+    };
+  }
+
   if (isTextGenerator(configOrGenerator)) {
     const executor = new GenerationExecutor(configOrGenerator);
     const emptyFactory = new ProviderFactory({
@@ -168,9 +213,11 @@ export class AIContentService implements IAIContentService {
   private readonly mediaGenerationService: MediaGenerationService;
 
   constructor(
-    configOrGenerator: AIProviderConfig | ProviderConfig | ITextGenerator,
+    configOrGenerator: AIProviderConfig | ProviderConfig | ITextGenerator | string,
+    model?: string,
+    textGenerator?: ITextGenerator,
   ) {
-    const bundle = buildServices(configOrGenerator);
+    const bundle = buildServices(configOrGenerator, model, textGenerator);
     this.providerFactory = bundle.providerFactory;
     this.blogService = bundle.blogService;
     this.socialService = bundle.socialService;

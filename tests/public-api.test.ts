@@ -82,6 +82,9 @@ describe("public API — @umituz/web-ai", () => {
       "buildImageRequest",
       "VIDEO_WIZARD_STEPS",
       "buildVideoRequest",
+      "safeJSONParse",
+      "extractJSON",
+      "RequestPriority",
     ]);
     // Chat's conversation-level ChatMessage is aliased as ConversationMessage;
     // type-only, so its presence is pinned by the typeOnlyExports annotation.
@@ -158,6 +161,9 @@ describe("public API — @umituz/web-ai", () => {
       "buildVideoRequest",
       "TextModelDefaults",
       "ModelDefaults",
+      "safeJSONParse",
+      "extractJSON",
+      "RequestPriority",
     ]);
     expect(typeOnlyExports.contentResult).toBeNull();
   });
@@ -225,5 +231,12 @@ describe("public API — @umituz/web-ai", () => {
       "ProviderUnavailableError",
       "ValidationError",
     ]);
+  });
+
+  it("AIContentService can be instantiated with string apiKey or provider config", () => {
+    const s1 = new content.AIContentService("test-api-key");
+    expect(s1).toBeDefined();
+    const s2 = new root.AIContentService("test-api-key", "claude-3-5-sonnet");
+    expect(s2).toBeDefined();
   });
 });

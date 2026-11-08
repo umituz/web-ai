@@ -50,3 +50,17 @@ export {
   VIDEO_WIZARD_STEPS,
   buildVideoRequest,
 } from '../wizard/video.wizard';
+
+// Infrastructure utilities
+export {
+  safeJSONParse,
+  extractJSON,
+  parseAIResponse,
+  isValidJSON,
+} from './infrastructure/utils/jsonParser';
+export {
+  RequestPriority,
+  batchRequest,
+  RequestQueue as ContentRequestQueue,
+} from './infrastructure/utils/requestQueue';
+export type { QueueConfig } from './infrastructure/utils/requestQueue';

@@ -1,10 +1,14 @@
 
 import { useCallback, useState } from 'react';
 import type { BlogGenerationRequest, GeneratedBlog } from '../content/domain/entities/ContentGeneration';
+import type { ProviderConfig } from '../content/domain/config/ProviderConfig';
 import { useAIContentContext, type ContentServiceConfig } from './internal/useAIContentContext';
 
 export interface UseBlogGeneratorOptions {
-  config: ContentServiceConfig;
+  config?: ContentServiceConfig;
+  apiKey?: string;
+  model?: string;
+  providers?: ProviderConfig;
 }
 
 export interface UseBlogGeneratorReturn {
@@ -18,6 +22,9 @@ export interface UseBlogGeneratorReturn {
 export function useBlogGenerator(options: UseBlogGeneratorOptions): UseBlogGeneratorReturn {
   const { service, ctx } = useAIContentContext({
     config: options.config,
+    apiKey: options.apiKey,
+    model: options.model,
+    providers: options.providers,
   });
   const [generatedBlog, setGeneratedBlog] = useState<GeneratedBlog | null>(null);
 

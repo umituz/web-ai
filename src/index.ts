@@ -72,6 +72,12 @@ export {
   buildVideoRequest,
   ProviderUnavailableError,
   ProviderQuotaExhaustedError,
+  safeJSONParse,
+  extractJSON,
+  parseAIResponse,
+  isValidJSON,
+  RequestPriority,
+  batchRequest,
 } from './content';
 
 export type {
@@ -128,4 +134,5 @@ export type {
   VideoWizardStep,
   VideoWizardData,
   VideoGenerationType,
+  QueueConfig,
 } from './content';

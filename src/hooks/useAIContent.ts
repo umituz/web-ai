@@ -26,6 +26,7 @@ import type {
 } from '../content/domain/entities/ABTesting';
 import type { ContentTone, Emotion } from '../content/domain/types';
 import type {
+  ProviderConfig,
   ImageGenerationRequest,
   VideoGenerationRequest,
   ImageToVideoRequest,
@@ -38,6 +39,10 @@ import { useAIContentContext, type AIOptionCallbacks, type ContentServiceConfig 
 export interface UseAIContentOptions {
   /** Provider config (AIProviderConfig or legacy ProviderConfig) or a custom ITextGenerator. */
   config?: ContentServiceConfig;
+  /** Legacy alias for config */
+  providers?: ProviderConfig;
+  apiKey?: string;
+  model?: string;
   onError?: (error: Error) => void;
   onProgress?: (progress: number) => void;
 }
@@ -82,6 +87,9 @@ export function useAIContent(options: UseAIContentOptions): UseAIContentReturn {
   const callbacks = useMemo(() => stableCallbacks(options), [options.onError, options.onProgress]);
   const { service, ctx } = useAIContentContext({
     config: options.config,
+    providers: options.providers,
+    apiKey: options.apiKey,
+    model: options.model,
     callbacks,
   });
 

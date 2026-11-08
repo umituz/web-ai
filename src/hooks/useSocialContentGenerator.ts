@@ -2,10 +2,14 @@
 import { useCallback, useState } from 'react';
 import type { SocialContentRequest, GeneratedSocialContent } from '../content/domain/entities/ContentGeneration';
 import type { ContentTone } from '../content/domain/types';
+import type { ProviderConfig } from '../content/domain/config/ProviderConfig';
 import { useAIContentContext, type ContentServiceConfig } from './internal/useAIContentContext';
 
 export interface UseSocialContentGeneratorOptions {
-  config: ContentServiceConfig;
+  config?: ContentServiceConfig;
+  apiKey?: string;
+  model?: string;
+  providers?: ProviderConfig;
 }
 
 export interface UseSocialContentGeneratorReturn {
@@ -22,6 +26,9 @@ export function useSocialContentGenerator(
 ): UseSocialContentGeneratorReturn {
   const { service, ctx } = useAIContentContext({
     config: options.config,
+    apiKey: options.apiKey,
+    model: options.model,
+    providers: options.providers,
   });
   const [generatedContents, setGeneratedContents] = useState<GeneratedSocialContent[]>([]);
 
