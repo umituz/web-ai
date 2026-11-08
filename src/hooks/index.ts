@@ -10,3 +10,4 @@ export * from './useVideoWizard';
 export * from './use-text.hook';
 export * from './use-cache-stats.hook';
 export * from './use-chat.hook';
+export * from './use-groq.hook';

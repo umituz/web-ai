@@ -14,7 +14,11 @@ export interface GroqProviderConfig {
   readonly timeoutMs?: number;
   /** Per-tier model overrides; merged over GROQ_TIERS. */
   readonly models?: TierModelMap;
+  /** Legacy model selector from @umituz/web-ai-groq-provider. */
+  readonly textModel?: string;
 }
+
+export type GroqConfig = GroqProviderConfig;
 
 export type GroqReasoningEffort = "low" | "medium" | "high";
 

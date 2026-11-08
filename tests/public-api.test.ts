@@ -113,6 +113,7 @@ describe("public API — @umituz/web-ai", () => {
     expectExports(hooks, [
       "useChat",
       "useText",
+      "useGroq",
       "useCacheStats",
       "useAIContent",
       "useAIGeneration",
@@ -122,7 +123,7 @@ describe("public API — @umituz/web-ai", () => {
     ]);
   });
 
-  it("exports map: seven code entries + package.json, hooks isolated from the root", async () => {
+  it("exports map: code entries + package.json, hooks isolated from the root", async () => {
     const packageJson = (await import("../package.json", { with: { type: "json" } })).default;
     const entries = Object.keys(packageJson.exports);
     expect(entries.sort()).toEqual(
@@ -130,6 +131,7 @@ describe("public API — @umituz/web-ai", () => {
         ".",
         "./core",
         "./providers",
+        "./groq",
         "./chat",
         "./content",
         "./wizard",

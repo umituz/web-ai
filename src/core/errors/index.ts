@@ -1,6 +1,8 @@
 export { AIErrorType, USER_FRIENDLY_ERROR_MESSAGES } from "./ai-error-types";
 export { AIError } from "./ai-error";
 export type { AIErrorMetadata } from "./ai-error";
+export { GroqError, GroqErrorType } from "./groq-error";
+export type { GroqErrorMetadata } from "./groq-error";
 export {
   isRetryableErrorType,
   isAuthErrorType,

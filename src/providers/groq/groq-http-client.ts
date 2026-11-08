@@ -1,6 +1,7 @@
 
 import type { GroqChatRequest, GroqChatResponse, GroqProviderConfig, StreamRequestOptions } from "./groq.entities";
 import type { IRequestExecutor } from "../../core/executor";
+import { GroqConfigStore } from "./groq-config-store";
 import { GroqHttpTransport } from "./groq-http-transport";
 import { RequestDeduplicator } from "../../core/utils";
 import { RequestQueue } from "../../core/utils";
@@ -14,6 +15,7 @@ import {
 import { QUEUE_PRIORITY_USER_REQUEST } from "../../core/constants/identifier.constants";
 
 export interface GroqHttpClientDeps {
+  readonly configStore?: GroqConfigStore;
   readonly transport?: GroqHttpTransport;
   readonly retryManager?: RetryManager;
   readonly queue?: RequestQueue;
@@ -23,15 +25,34 @@ export interface GroqHttpClientDeps {
 /**
  * Groq HTTP client with the ported strategy stack: identical concurrent
  * requests are deduplicated, transient failures retried with backoff, and
- * everything is funneled through a priority queue. Composition root for
- * GroqProvider — no global state.
+ * everything is funneled through a priority queue.
+ *
+ * Supports both standalone initialization `new GroqHttpClient(config)`
+ * and deferred initialization `const c = new GroqHttpClient(); c.initialize(config)`.
  */
 export class GroqHttpClient {
+  private readonly configStore: GroqConfigStore;
   private readonly transport: GroqHttpTransport;
   private readonly executor: IRequestExecutor<[GroqChatRequest], GroqChatResponse>;
 
-  constructor(config: GroqProviderConfig, deps: GroqHttpClientDeps = {}) {
-    this.transport = deps.transport ?? new GroqHttpTransport(config);
+  constructor(
+    configOrDeps?: GroqProviderConfig | GroqHttpClientDeps,
+    maybeDeps: GroqHttpClientDeps = {},
+  ) {
+    const isConfig =
+      typeof configOrDeps === "object" &&
+      configOrDeps !== null &&
+      "apiKey" in configOrDeps &&
+      typeof (configOrDeps as GroqProviderConfig).apiKey === "string";
+
+    const deps = isConfig ? maybeDeps : (configOrDeps as GroqHttpClientDeps | undefined) ?? {};
+
+    this.configStore = deps.configStore ?? new GroqConfigStore();
+    if (isConfig) {
+      this.configStore.initialize(configOrDeps as GroqProviderConfig);
+    }
+
+    this.transport = deps.transport ?? new GroqHttpTransport(this.configStore);
 
     const retryManager = deps.retryManager ?? new RetryManager();
     const queue = deps.queue ?? new RequestQueue();
@@ -40,11 +61,27 @@ export class GroqHttpClient {
     this.executor = new CompositeExecutor<[GroqChatRequest], GroqChatResponse>([
       new DedupeExecutor<[GroqChatRequest], GroqChatResponse>(deduplicator, {
         generateKey: (request) =>
-          deduplicatorKey(request, config.apiKey),
+          deduplicatorKey(request, this.configStore.isInitialized() ? this.configStore.get().apiKey : ""),
       }),
       new RetryExecutor<[GroqChatRequest], GroqChatResponse>(retryManager),
       new QueueExecutor<[GroqChatRequest], GroqChatResponse>(queue, QUEUE_PRIORITY_USER_REQUEST),
     ]);
+  }
+
+  initialize(config: GroqProviderConfig): void {
+    this.configStore.initialize(config);
+  }
+
+  isInitialized(): boolean {
+    return this.configStore.isInitialized();
+  }
+
+  getApiKey(): string {
+    return this.configStore.get().apiKey;
+  }
+
+  setApiKey(apiKey: string): void {
+    this.configStore.setApiKey(apiKey);
   }
 
   cancelPendingRequests(): void {
@@ -63,6 +100,11 @@ export class GroqHttpClient {
     options?: StreamRequestOptions,
   ): Promise<ReadableStream<Uint8Array>> {
     return this.transport.streamChatCompletion(request, options);
+  }
+
+  reset(): void {
+    this.transport.cancelPendingRequests();
+    this.configStore.reset();
   }
 }
 

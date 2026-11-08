@@ -35,20 +35,64 @@ export type {
 } from "./anthropic/anthropic.entities";
 
 export { GroqProvider, toGroqMessages } from "./groq/groq.provider";
-export { GROQ_MODELS, GROQ_TIERS } from "./groq/groq.constants";
+export {
+  GROQ_MODELS,
+  GROQ_TIERS,
+  DEFAULT_MODELS,
+  DEFAULT_BASE_URL,
+  API_ENDPOINTS,
+  TIMEOUTS,
+  DEFAULT_GENERATION_CONFIG,
+} from "./groq/groq.constants";
 export { GroqChatRequestBuilder } from "./groq/groq-request.builder";
 export { GroqHttpClient } from "./groq/groq-http-client";
+export type { GroqHttpClientDeps } from "./groq/groq-http-client";
 export { GroqHttpTransport } from "./groq/groq-http-transport";
+export { GroqConfigStore } from "./groq/groq-config-store";
 export {
   extractContentFromSsePayload,
   consumeGroqStream,
 } from "./groq/groq-sse";
+export {
+  createUserMessage,
+  createAssistantMessage,
+  createSystemMessage,
+  createMessage,
+  promptToMessages,
+  extractTextFromMessages,
+  formatMessagesForDisplay,
+} from "./groq/groq-messages";
+export { requestStructuredJson } from "./groq/groq-structured-json";
+export type { StructuredJsonRequest } from "./groq/groq-structured-json";
+export { TextGenerationService } from "./groq/text-generation.service";
+export type {
+  TextGenerationOptions,
+  StreamingCallbacks,
+  StructuredGenerationOptions,
+  IGroqChatService,
+  IGroqHttpClient,
+} from "./groq/groq-interfaces";
+export {
+  configureProvider,
+  getProvider,
+  resetProvider,
+} from "./groq/groq-container";
+export type { AppContainer } from "./groq/groq-container";
 export type {
   GroqProviderConfig,
+  GroqConfig,
   GroqChatRequest,
   GroqChatResponse,
   GroqChatChunk,
   GroqMessage,
+  GroqMessageRole,
+  GroqReasoningEffort,
+  GroqGenerationConfig,
+  GroqUsage,
+  GroqChoice,
+  GroqChunkChoice,
+  GroqErrorResponse,
+  StreamRequestOptions,
 } from "./groq/groq.entities";
 
 export { GeminiProvider, createGeminiProvider, GEMINI_TIERS } from "./gemini/gemini.provider";

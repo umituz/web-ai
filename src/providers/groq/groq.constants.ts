@@ -31,13 +31,25 @@ export const DEFAULT_GENERATION_CONFIG = {
   topP: 1.0,
 } as const;
 
+export const DEFAULT_MODELS = {
+  TEXT: GROQ_MODELS.LLAMA_3_1_8B_INSTANT,
+  FAST: GROQ_MODELS.LLAMA_3_1_8B_INSTANT,
+  EXPERIMENTAL: GROQ_MODELS.GPT_OSS_20B,
+} as const;
+
 export const GROQ_BASE_URL = "https://api.groq.com/openai/v1" as const;
+export const DEFAULT_BASE_URL = GROQ_BASE_URL;
+
 export const CHAT_COMPLETIONS_PATH = "/chat/completions" as const;
+export const API_ENDPOINTS = {
+  CHAT: CHAT_COMPLETIONS_PATH,
+} as const;
 
 export const GROQ_TIMEOUTS = {
   DEFAULT: 30000,
   STREAMING: 60000,
 } as const;
+export const TIMEOUTS = GROQ_TIMEOUTS;
 
 export const HTTP_HEADERS = {
   CONTENT_TYPE: "Content-Type",

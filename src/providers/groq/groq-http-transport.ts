@@ -10,6 +10,7 @@ import {
   HTTP_HEADERS,
 } from "./groq.constants";
 import type { GroqProviderConfig } from "./groq.entities";
+import type { GroqConfigStore } from "./groq-config-store";
 
 /**
  * Raw HTTP transport for Groq's OpenAI-compatible chat/completions endpoint.
@@ -19,7 +20,14 @@ import type { GroqProviderConfig } from "./groq.entities";
 export class GroqHttpTransport {
   private readonly pendingAbortControllers = new Set<AbortController>();
 
-  constructor(private readonly config: GroqProviderConfig) {}
+  constructor(private readonly configSource: GroqProviderConfig | GroqConfigStore) {}
+
+  private getConfig(): GroqProviderConfig {
+    if ("get" in this.configSource && typeof this.configSource.get === "function") {
+      return this.configSource.get();
+    }
+    return this.configSource as GroqProviderConfig;
+  }
 
   cancelPendingRequests(): void {
     for (const controller of this.pendingAbortControllers) {
@@ -40,7 +48,7 @@ export class GroqHttpTransport {
     options: StreamRequestOptions = {},
   ): Promise<ReadableStream<Uint8Array>> {
     const url = `${this.baseUrl()}${CHAT_COMPLETIONS_PATH}`;
-    const timeout = this.config.timeoutMs ?? GROQ_TIMEOUTS.STREAMING;
+    const timeout = this.getConfig().timeoutMs ?? GROQ_TIMEOUTS.STREAMING;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -73,12 +81,12 @@ export class GroqHttpTransport {
   }
 
   private baseUrl(): string {
-    return this.config.baseUrl ?? GROQ_BASE_URL;
+    return this.getConfig().baseUrl ?? GROQ_BASE_URL;
   }
 
   private async request<T>(endpoint: string, body: unknown): Promise<T> {
     const url = `${this.baseUrl()}${endpoint}`;
-    const timeout = this.config.timeoutMs ?? GROQ_TIMEOUTS.DEFAULT;
+    const timeout = this.getConfig().timeoutMs ?? GROQ_TIMEOUTS.DEFAULT;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -106,7 +114,7 @@ export class GroqHttpTransport {
   private buildHeaders(): HeadersInit {
     return {
       [HTTP_HEADERS.CONTENT_TYPE]: HTTP_HEADERS.APPLICATION_JSON,
-      [HTTP_HEADERS.AUTHORIZATION]: `${HTTP_HEADERS.BEARER_PREFIX}${this.config.apiKey}`,
+      [HTTP_HEADERS.AUTHORIZATION]: `${HTTP_HEADERS.BEARER_PREFIX}${this.getConfig().apiKey}`,
     };
   }
 
