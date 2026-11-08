@@ -15,8 +15,25 @@ export interface SseResponseOptions {
   readonly donePayload: unknown;
   readonly errorCode: (error: unknown) => string;
   readonly onStreamFailure?: (error: unknown) => Promise<void> | void;
-  /** Provider-specific: pulls the displayable text delta out of an SSE payload. */
-  readonly extractDelta: SseDeltaExtractor;
+  /** Provider-specific: pulls the displayable text delta out of an SSE payload. Defaults to standard choices[0].delta.content extractor. */
+  readonly extractDelta?: SseDeltaExtractor;
+}
+
+export function defaultSseDeltaExtractor(payload: string): string | null {
+  try {
+    const parsed = JSON.parse(payload) as {
+      choices?: Array<{ delta?: { content?: string | null } }>;
+      delta?: { text?: string };
+      text?: string;
+    };
+    const content = parsed.choices?.[0]?.delta?.content;
+    if (typeof content === "string" && content.length > 0) return content;
+    if (typeof parsed.delta?.text === "string" && parsed.delta.text.length > 0) return parsed.delta.text;
+    if (typeof parsed.text === "string" && parsed.text.length > 0) return parsed.text;
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export function createSseResponse(
@@ -25,6 +42,7 @@ export function createSseResponse(
 ): Response {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+  const extractDelta = options.extractDelta ?? defaultSseDeltaExtractor;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
@@ -53,7 +71,7 @@ export function createSseResponse(
         if (!isSseDataLine(trimmed)) return false;
         const payload = extractSseDataPayload(trimmed);
         if (isSseDoneMarker(payload)) return true;
-        const text = options.extractDelta(payload);
+        const text = extractDelta(payload);
         if (text) {
           delivered = true;
           emit(SSE_BRIDGE_EVENTS.delta, { text });

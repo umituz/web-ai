@@ -73,6 +73,18 @@ describe("createSseResponse", () => {
     ]);
   });
 
+  it("defaults to standard delta extractor when extractDelta is omitted", async () => {
+    const response = createSseResponse(
+      () => Promise.resolve(streamFromChunks([`data: ${deltaPayload("default text")}`])),
+      { donePayload: { ok: true }, errorCode: () => "ai.error" },
+    );
+    const frames = await readFrames(response);
+    expect(frames).toEqual([
+      `event: delta\ndata: ${JSON.stringify({ text: "default text" })}`,
+      `event: done\ndata: ${JSON.stringify({ ok: true })}`,
+    ]);
+  });
+
   it("calls onStreamFailure and emits an error frame when nothing was delivered", async () => {
     const failures: unknown[] = [];
     const response = createSseResponse(() => Promise.resolve(streamFailingAfter([])), {
