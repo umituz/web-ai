@@ -156,13 +156,18 @@ export class ProviderFactory implements ITextGenerator {
     let finished = false;
     let failure: unknown;
 
+    const controller = new AbortController();
+    const onAbort = () => controller.abort();
+    request.signal?.addEventListener("abort", onAbort);
+    const effectiveRequest = { ...request, signal: controller.signal };
+
     const notify = (): void => {
       const resolve = wake;
       wake = null;
       resolve?.();
     };
 
-    const completion = this.chatStream(request, {
+    const completion = this.chatStream(effectiveRequest, {
       onChunk: (chunk) => {
         queue.push(chunk);
         notify();
@@ -179,18 +184,23 @@ export class ProviderFactory implements ITextGenerator {
       },
     );
 
-    while (!finished || queue.length > 0) {
-      if (queue.length === 0 && !finished) {
-        await new Promise<void>((resolve) => {
-          wake = resolve;
-        });
+    try {
+      while (!finished || queue.length > 0) {
+        if (queue.length === 0 && !finished) {
+          await new Promise<void>((resolve) => {
+            wake = resolve;
+          });
+        }
+        while (queue.length > 0) {
+          yield queue.shift() as string;
+        }
+        if (failure) throw failure;
       }
-      while (queue.length > 0) {
-        yield queue.shift() as string;
-      }
-      if (failure) throw failure;
+      await completion;
+    } finally {
+      controller.abort();
+      request.signal?.removeEventListener("abort", onAbort);
     }
-    await completion;
   }
 
   async generateJson<T>(

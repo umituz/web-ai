@@ -75,6 +75,17 @@ function toAIProviderConfig(config: AIProviderConfig | ProviderConfig): AIProvid
   const legacy = config as ProviderConfig;
   const modern = config as AIProviderConfig;
 
+  const anthropic =
+    modern.anthropic ??
+    (legacy.anthropic?.enabled
+      ? {
+          apiKey: legacy.anthropic.apiKey,
+          baseUrl: legacy.anthropic.baseUrl,
+          timeoutMs: legacy.anthropic.timeout,
+          models: legacy.anthropic.models,
+          effort: legacy.anthropic.effort,
+        }
+      : undefined);
   const groq =
     modern.groq ??
     (legacy.groq?.enabled
@@ -97,7 +108,7 @@ function toAIProviderConfig(config: AIProviderConfig | ProviderConfig): AIProvid
     priority: modern.priority,
     fallbackEnabled: modern.fallbackEnabled,
     defaultTier: modern.defaultTier,
-    anthropic: modern.anthropic,
+    ...(anthropic ? { anthropic } : {}),
     ...(groq ? { groq } : {}),
     ...(gemini ? { gemini } : {}),
     ...(fal ? { fal } : {}),

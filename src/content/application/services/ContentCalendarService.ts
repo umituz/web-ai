@@ -36,11 +36,23 @@ export class ContentCalendarService {
     const validatedDays = validateCalendarDays(days);
 
     const prompt = PromptBuilder.contentCalendar(validatedNiche, validatedDays);
-    const data = await this.executor.runJson<CalendarItem[]>(prompt, [], {
-      maxTokens: estimateTokenBudgetForCalendarDays(validatedDays),
-      temperature: 0.8,
-    });
+    const data = await this.executor.runJson<CalendarItem[] | { calendar?: CalendarItem[]; entries?: CalendarItem[] }>(
+      prompt,
+      [],
+      {
+        maxTokens: estimateTokenBudgetForCalendarDays(validatedDays),
+        temperature: 0.8,
+      },
+    );
 
-    return data.map(toCalendarEntry);
+    const items = Array.isArray(data)
+      ? data
+      : Array.isArray((data as { calendar?: CalendarItem[] })?.calendar)
+        ? (data as { calendar: CalendarItem[] }).calendar
+        : Array.isArray((data as { entries?: CalendarItem[] })?.entries)
+          ? (data as { entries: CalendarItem[] }).entries
+          : [];
+
+    return items.map(toCalendarEntry);
   }
 }

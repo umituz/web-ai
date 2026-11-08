@@ -11,18 +11,20 @@ import type { ChatMessage as CoreChatMessage } from "../../core/types";
 import type { SystemPromptStrategy } from "../utils/prompt-strategy";
 
 export interface IChatService {
-  sendMessage(input: SendMessageInput): Promise<SendMessageResult>;
+  sendMessage(input: SendMessageInput, signal?: AbortSignal): Promise<SendMessageResult>;
   getConversation(conversationId: string): Promise<ChatConversation | null>;
   getConversations(): Promise<ChatConversation[]>;
   generateAIResponse(
     companionId: string,
     userMessage: string,
     context?: ReadonlyArray<ChatMessage>,
+    signal?: AbortSignal,
   ): Promise<ChatMessage>;
   generateStreamingResponse(
     userMessage: string,
     context: ReadonlyArray<ChatMessage>,
     onChunk: (chunk: string) => void,
+    signal?: AbortSignal,
   ): Promise<string>;
 }
 

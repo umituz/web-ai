@@ -11,7 +11,12 @@ import type {
   TextTier,
   ChatMessage,
 } from '../../core/types';
-import { AIError, AIErrorType } from '../../core/errors';
+import {
+  AIError,
+  AIErrorType,
+  classifyHttpStatus,
+  extractErrorMessageFromResponse,
+} from '../../core/errors';
 import { JsonResponseParser, StructuredPromptBuilder } from '../../core/parsers';
 import { mergeTierOverrides, resolveModel, type TierModelMap } from '../../core/tiers';
 import type {
@@ -109,7 +114,9 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
         }
       );
 
-      return response.ok ? 'healthy' : 'unavailable';
+      if (response.ok) return 'healthy';
+      if (response.status === 401 || response.status === 403) return 'unavailable';
+      return 'degraded';
     } catch {
       return 'unavailable';
     }
@@ -122,6 +129,14 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
   async generate(request: TextRequest): Promise<GenerationResult> {
     try {
       const model = request.model ?? this.resolveModel(request.tier ?? 'balanced');
+      const systemMessages = request.messages.filter((m) => m.role === 'system');
+      const systemPrompt =
+        request.systemPrompt && request.systemPrompt.length > 0
+          ? request.systemPrompt
+          : systemMessages.length > 0
+            ? systemMessages.map((m) => m.content).join('\n')
+            : undefined;
+
       const response = await this.withRetry(async () => {
         return await this.fetchWithTimeout(
           `${this.config.baseUrl}/models/${model}:generateContent`,
@@ -130,14 +145,14 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
             headers: this.authHeaders(),
             body: JSON.stringify({
               systemInstruction:
-                request.systemPrompt && request.systemPrompt.length > 0
-                  ? { parts: [{ text: request.systemPrompt }] }
+                systemPrompt && systemPrompt.length > 0
+                  ? { parts: [{ text: systemPrompt }] }
                   : undefined,
               contents: toGeminiContents(request.messages),
               generationConfig: {
-                temperature: request.temperature || 0.7,
-                maxOutputTokens: request.maxTokens || 2048,
-                topP: request.topP || 0.9,
+                temperature: request.temperature ?? 0.7,
+                maxOutputTokens: request.maxTokens ?? 2048,
+                topP: request.topP ?? 0.9,
               },
             }),
           }
@@ -145,11 +160,17 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.statusText}`);
+        const message = await extractErrorMessageFromResponse(response);
+        throw new AIError(
+          classifyHttpStatus(response.status),
+          `Gemini API error (${response.status}): ${message}`,
+          undefined,
+          { status: response.status, model },
+        );
       }
 
       const data: GeminiResponse = await response.json();
-      const text = data.candidates[0]?.content?.parts
+      const text = data.candidates?.[0]?.content?.parts
         ?.map((part) => part.text ?? '')
         .join('') ?? '';
       if (text.length === 0) {
@@ -167,7 +188,7 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
           : undefined,
         model,
         providerId: this.id,
-        finishReason: mapGeminiFinishReason(data.candidates[0]?.finishReason),
+        finishReason: mapGeminiFinishReason(data.candidates?.[0]?.finishReason),
       };
     } catch (error) {
       if (error instanceof AIError) throw error;
@@ -230,14 +251,20 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
       });
 
       if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.statusText}`);
+        const message = await extractErrorMessageFromResponse(response);
+        throw new AIError(
+          classifyHttpStatus(response.status),
+          `Gemini image generation error (${response.status}): ${message}`,
+          undefined,
+          { status: response.status },
+        );
       }
 
       const data: GeminiResponse = await response.json();
 
-      const imageData = data.candidates[0]?.content?.parts[0]?.inlineData;
+      const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData;
       if (!imageData) {
-        throw new Error('No image data in response');
+        throw new AIError(AIErrorType.SERVER_ERROR, 'No image data in Gemini response');
       }
 
       const url = `data:${imageData.mimeType};base64,${imageData.data}`;

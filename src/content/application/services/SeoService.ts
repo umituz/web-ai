@@ -7,7 +7,6 @@ import { clampScoreToValidRange } from '../../domain/predicates/ScoreRangeGuard'
 import {
   calculateKeywordDensity,
   countKeywordOccurrences,
-  countWordsInContent,
 } from '../../domain/calculations/SeoKeywordDensity';
 import { classifyKeywordProminence, isUnderutilizedKeyword } from '../../domain/predicates/KeywordProminenceClassifier';
 import type {
@@ -84,7 +83,6 @@ export class SeoService {
   analyzeKeywords(content: string, keywords: string[]): KeywordAnalysis[] {
     const validatedContent = validateContentBody(content);
     const validatedKeywords = validateKeywordList(keywords);
-    void countWordsInContent(validatedContent);
 
     return validatedKeywords.map((keyword) => {
       const count = countKeywordOccurrences(validatedContent, keyword);

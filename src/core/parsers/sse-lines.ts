@@ -1,11 +1,17 @@
 import { SSE_DONE_MARKER, SSE_PREFIX } from "../constants/protocol.constants";
 
 export function isSseDataLine(line: string): boolean {
-  return line.startsWith(SSE_PREFIX);
+  return line.startsWith(SSE_PREFIX) || line.startsWith("data:");
 }
 
 export function extractSseDataPayload(line: string): string {
-  return line.slice(SSE_PREFIX.length);
+  if (line.startsWith(SSE_PREFIX)) {
+    return line.slice(SSE_PREFIX.length);
+  }
+  if (line.startsWith("data:")) {
+    return line.slice(5);
+  }
+  return line;
 }
 
 export function isSseDoneMarker(payload: string): boolean {

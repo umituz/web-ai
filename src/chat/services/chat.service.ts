@@ -74,10 +74,17 @@ export class ChatService implements IChatService {
   }
 
   async getConversations(): Promise<ChatConversation[]> {
+    if (
+      this.storage &&
+      "getConversations" in this.storage &&
+      typeof (this.storage as unknown as { getConversations: () => Promise<ChatConversation[]> }).getConversations === "function"
+    ) {
+      return (this.storage as unknown as { getConversations: () => Promise<ChatConversation[]> }).getConversations();
+    }
     return [];
   }
 
-  async sendMessage(input: SendMessageInput): Promise<SendMessageResult> {
+  async sendMessage(input: SendMessageInput, signal?: AbortSignal): Promise<SendMessageResult> {
     const userMessage: ChatMessage = {
       ...messageFormatter.toChatMessage(input.text, "user"),
       type: input.type ?? "text",
@@ -88,6 +95,7 @@ export class ChatService implements IChatService {
       input.companionId,
       input.text,
       [],
+      signal,
     );
 
     return { userMessage, aiResponse };
@@ -97,9 +105,10 @@ export class ChatService implements IChatService {
     companionId: string,
     userMessage: string,
     context: ReadonlyArray<ChatMessage> = [],
+    signal?: AbortSignal,
   ): Promise<ChatMessage> {
     const result = await this.run({
-      ...this.buildRequest(userMessage, context),
+      ...this.buildRequest(userMessage, context, signal),
     });
 
     return {
@@ -121,8 +130,9 @@ export class ChatService implements IChatService {
     userMessage: string,
     context: ReadonlyArray<ChatMessage>,
     onChunk: (chunk: string) => void,
+    signal?: AbortSignal,
   ): Promise<string> {
-    const request = this.buildRequest(userMessage, context);
+    const request = this.buildRequest(userMessage, context, signal);
     const result = await this.runStream(request, { onChunk });
     return result.text;
   }
@@ -130,6 +140,7 @@ export class ChatService implements IChatService {
   private buildRequest(
     userMessage: string,
     context: ReadonlyArray<ChatMessage>,
+    signal?: AbortSignal,
   ): TextRequest {
     const messages = messageFormatter.toCoreMessages(context);
     messages.push({ role: "user", content: userMessage });
@@ -140,6 +151,7 @@ export class ChatService implements IChatService {
       tier: this.config.tier,
       temperature: this.config.temperature,
       maxTokens: this.config.maxTokens,
+      ...(signal !== undefined ? { signal } : {}),
     };
   }
 

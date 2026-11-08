@@ -42,9 +42,19 @@ export interface GeminiConfig extends BaseProviderConfig {
   };
 }
 
+export interface AnthropicConfig extends BaseProviderConfig {
+  models?: {
+    fast?: string;
+    balanced?: string;
+    powerful?: string;
+  };
+  effort?: 'low' | 'medium' | 'high';
+}
+
 export interface ProviderConfig {
   priority: string[];
 
+  anthropic?: AnthropicConfig;
   groq?: GroqConfig;
   fal?: FalConfig;
   pruna?: PrunaConfig;

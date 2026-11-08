@@ -91,22 +91,18 @@ export function useText(
   );
 
   useEffect(() => {
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
 
   const runWithState = useCallback(
     async <T>(task: (signal: AbortSignal) => Promise<T>): Promise<T | null> => {
-      const controller = abortControllerRef.current;
-      if (!controller) {
-        return null;
-      }
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       const { signal } = controller;
-      if (signal.aborted) return null;
 
       setIsLoading(true);
       setError(null);
@@ -127,6 +123,9 @@ export function useText(
       } finally {
         if (!signal.aborted) {
           setIsLoading(false);
+        }
+        if (abortControllerRef.current === controller) {
+          abortControllerRef.current = null;
         }
       }
     },
@@ -224,6 +223,7 @@ export function useText(
 
   const cancel = useCallback(() => {
     abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
     setIsLoading(false);
   }, []);
 

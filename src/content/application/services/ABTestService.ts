@@ -83,15 +83,17 @@ export class ABTestService {
 
     const scoreA = predictions[0]?.predictedEngagement ?? FALLBACK_ENGAGEMENT;
     const scoreB = predictions[1]?.predictedEngagement ?? FALLBACK_ENGAGEMENT;
+    const isTie = scoreA === scoreB;
     const winner = selectHigherScoreVariantId(scoreA, scoreB, VARIANT_A_ID, VARIANT_B_ID);
     const improvement = calculateImprovementPercentage(scoreA, scoreB);
 
     return {
       winner,
       confidence: AB_TEST_DEFAULT_CONFIDENCE,
-      improvement: `+${improvement}% engagement`,
-      reasoning:
-        winner === VARIANT_A_ID
+      improvement: isTie ? '0%' : `+${improvement}% engagement`,
+      reasoning: isTie
+        ? 'Both variants have equal predicted engagement'
+        : winner === VARIANT_A_ID
           ? 'Variant A has more engaging content'
           : 'Variant B has more engaging content',
       recommendations: [...DEFAULT_RECOMMENDATIONS],

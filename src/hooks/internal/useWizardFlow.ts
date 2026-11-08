@@ -63,10 +63,14 @@ export function useWizardFlow<T extends string, D extends object>(
     return Math.round((currentIndex / (steps.length - 1)) * 100);
   }, [currentIndex, steps.length]);
 
+  const completedRef = useRef(false);
+
   const navigateTo = useCallback((to: T) => {
     setCurrentStep((prev) => {
       if (prev === to) return prev;
-      optionsRef.current.onStepChange?.(prev, to);
+      queueMicrotask(() => {
+        optionsRef.current.onStepChange?.(prev, to);
+      });
       return to;
     });
   }, []);
@@ -115,14 +119,18 @@ export function useWizardFlow<T extends string, D extends object>(
   );
 
   const reset = useCallback(() => {
+    completedRef.current = false;
     setCurrentStep(optionsRef.current.initialStep);
     setWizardData({} as D);
     setIsProcessing(false);
   }, []);
 
   useEffect(() => {
-    if (currentIndex === steps.length - 1 && steps.length > 0) {
+    if (currentIndex === steps.length - 1 && steps.length > 0 && !completedRef.current) {
+      completedRef.current = true;
       optionsRef.current.onComplete?.(wizardData);
+    } else if (currentIndex < steps.length - 1) {
+      completedRef.current = false;
     }
   }, [currentIndex, steps.length, wizardData]);
 

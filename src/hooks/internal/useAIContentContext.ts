@@ -82,7 +82,7 @@ export function useAIContentContext(options: UseAIContentContextOptions): UseAIC
     const finalError = aiError.message ? aiError : new AIError(fallbackMessage, 'UNKNOWN', err);
     if (mountedRef.current) {
       setError(finalError.message);
-      setErrorCode(finalError.code);
+      setErrorCode(finalError.code as AIErrorCode);
     }
     callbacksRef.current?.onError?.(finalError);
     return finalError;

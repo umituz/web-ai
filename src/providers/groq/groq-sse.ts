@@ -73,6 +73,16 @@ export async function consumeGroqStream(
       return;
     }
 
+    const errorBody = (chunk as unknown as GroqErrorResponse).error;
+    if (errorBody) {
+      throw new AIError(
+        errorBody.message?.toLowerCase().includes("rate limit")
+          ? AIErrorType.RATE_LIMIT_ERROR
+          : AIErrorType.SERVER_ERROR,
+        errorBody.message || "Groq stream failed mid-flight",
+      );
+    }
+
     if (chunk.model) model = chunk.model;
 
     const choice = chunk.choices?.[0];
@@ -87,14 +97,6 @@ export async function consumeGroqStream(
     const tailUsage = chunk.x_groq?.usage;
     if (tailUsage) {
       usage = mapGroqUsage(tailUsage);
-    }
-
-    const errorBody = (chunk as unknown as GroqErrorResponse).error;
-    if (errorBody) {
-      throw new AIError(
-        AIErrorType.SERVER_ERROR,
-        errorBody.message || "Groq stream failed mid-flight",
-      );
     }
   };
 

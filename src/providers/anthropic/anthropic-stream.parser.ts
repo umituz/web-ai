@@ -82,13 +82,21 @@ export async function consumeAnthropicStream(
         break;
       case "message_stop":
         break;
-      case "error":
-        throw new AIError(
-          event.error.type === "rate_limit_error"
+      case "error": {
+        const errType = event.error.type;
+        const mappedType =
+          errType === "rate_limit_error"
             ? AIErrorType.RATE_LIMIT_ERROR
-            : AIErrorType.SERVER_ERROR,
+            : errType === "authentication_error"
+              ? AIErrorType.INVALID_API_KEY
+              : errType === "invalid_request_error"
+                ? AIErrorType.CLIENT_ERROR
+                : AIErrorType.SERVER_ERROR;
+        throw new AIError(
+          mappedType,
           event.error.message || "Anthropic stream failed mid-flight",
         );
+      }
       default:
         break;
     }

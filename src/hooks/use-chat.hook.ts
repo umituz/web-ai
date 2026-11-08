@@ -79,10 +79,8 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
   }, [conversationId, surfaceError]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
@@ -130,9 +128,11 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
       void persist(userMessage);
       callbacksRef.current.onMessageSent?.(userMessage);
 
+      let streamingPlaceholderId: string | null = null;
       try {
         if (streamEnabled) {
           const placeholderId = chatIdGenerator.next("assistant");
+          streamingPlaceholderId = placeholderId;
           const placeholder: ChatMessage = {
             id: placeholderId,
             sender: "assistant",
@@ -155,6 +155,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
                 ),
               );
             },
+            controller.signal,
           );
 
           const finalMessage: ChatMessage = {
@@ -174,6 +175,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
           conversationId,
           trimmed,
           contextForAI,
+          controller.signal,
         );
 
         setMessages((prev) => [...prev, aiResponse]);
@@ -181,6 +183,10 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
         callbacksRef.current.onAIResponse?.(aiResponse);
         return aiResponse;
       } catch (err) {
+        if (streamingPlaceholderId) {
+          const failedId = streamingPlaceholderId;
+          setMessages((prev) => prev.filter((m) => m.id !== failedId));
+        }
         surfaceError(err);
         return null;
       } finally {
@@ -218,6 +224,10 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
         ? currentMessages.slice(0, -1)
         : currentMessages;
 
+    const controller = new AbortController();
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
     setIsTyping(true);
@@ -227,6 +237,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
         conversationId,
         lastUserMessage.content,
         trimmed,
+        controller.signal,
       );
 
       setMessages((prev) => {
@@ -245,6 +256,9 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
     } finally {
       setIsLoading(false);
       setIsTyping(false);
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
   }, [chatService, conversationId, isLoading, messages, persist, surfaceError]);
 

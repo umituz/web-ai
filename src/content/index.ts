@@ -19,6 +19,7 @@ export type {
   ProviderHealth,
   ProviderType,
   BaseProviderConfig,
+  AnthropicConfig,
   GroqConfig,
   FalConfig,
   PrunaConfig,

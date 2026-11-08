@@ -18,11 +18,12 @@ const buildScriptResult = (
   if (!script) {
     throw new Error('AI response missing script field');
   }
+  const wordCount = script.trim().length === 0 ? 0 : script.trim().split(/\s+/).length;
   return {
     ...parsed,
     script,
     duration,
-    wordCount: script.split(' ').length,
+    wordCount,
   } as GeneratedVideoScript;
 };
 
