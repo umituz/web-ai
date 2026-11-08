@@ -1,0 +1,113 @@
+{
+  "name": "@umituz/web-ai",
+  "version": "1.0.0",
+  "description": "Provider-agnostic AI engine for web and edge — text, chat, structured output and streaming over swappable providers (Anthropic, Groq, Gemini, fal, Pruna), plus a content generation suite",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js",
+      "require": "./dist/providers/index.cjs"
+    },
+    "./chat": {
+      "types": "./dist/chat/index.d.ts",
+      "import": "./dist/chat/index.js",
+      "require": "./dist/chat/index.cjs"
+    },
+    "./content": {
+      "types": "./dist/content/index.d.ts",
+      "import": "./dist/content/index.js",
+      "require": "./dist/content/index.cjs"
+    },
+    "./wizard": {
+      "types": "./dist/wizard/index.d.ts",
+      "import": "./dist/wizard/index.js",
+      "require": "./dist/wizard/index.cjs"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js",
+      "require": "./dist/hooks/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "version:patch": "npm version patch -m 'chore: release v%s'",
+    "version:minor": "npm version minor -m 'chore: release v%s'",
+    "version:major": "npm version major -m 'chore: release v%s'"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "anthropic",
+    "claude",
+    "groq",
+    "gemini",
+    "provider-agnostic",
+    "chat",
+    "streaming",
+    "structured-output",
+    "content-generation",
+    "react",
+    "cloudflare-workers",
+    "typescript"
+  ],
+  "author": "umituz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/umituz/web-ai"
+  },
+  "peerDependencies": {
+    "@umituz/pruna-provider": ">=1.0.0",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@umituz/pruna-provider": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@umituz/pruna-provider": "^1.0.9",
+    "eslint": "^9.32.0",
+    "react": "18.3.1",
+    "tsup": "^8.0.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.38.0",
+    "vitest": "^3.2.7"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
