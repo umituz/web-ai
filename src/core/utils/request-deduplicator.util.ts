@@ -28,9 +28,14 @@ export class RequestDeduplicator {
       timestamp: Date.now(),
     });
 
-    promise.finally(() => {
-      this.pendingRequests.delete(key);
-    });
+    // The cleanup chain must swallow its own rejection: callers handle the
+    // original `promise`, and an unhandled `.finally` derivative would crash
+    // hosts that treat unhandled rejections as fatal (Workers, vitest).
+    promise
+      .catch(() => undefined)
+      .then(() => {
+        this.pendingRequests.delete(key);
+      });
 
     return promise;
   }
