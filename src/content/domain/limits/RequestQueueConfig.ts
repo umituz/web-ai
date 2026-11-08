@@ -1,0 +1,15 @@
+
+export const RequestQueueConfig = {
+  MAX_CONCURRENT: 3,
+  MAX_QUEUE_SIZE: 50,
+  DEFAULT_TIMEOUT_MS: 30_000,
+  RETRY_DELAY_MS: 1_000,
+
+  RATE_LIMIT: {
+    ENABLED: true,
+    WINDOW_MS: 60_000,
+    MAX_REQUESTS_PER_WINDOW: 100,
+  },
+
+  POLL_INTERVAL_MS: 100,
+} as const;

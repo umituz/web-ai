@@ -71,8 +71,4 @@ export interface StructuredGeneration<T> {
   readonly result: GenerationResult;
 }
 
-export interface ProviderHealth {
-  readonly status: "healthy" | "degraded" | "exhausted" | "unavailable";
-  readonly lastCheckedAt: number;
-  readonly message?: string;
-}
+export type ProviderHealth = "healthy" | "degraded" | "exhausted" | "unavailable";
