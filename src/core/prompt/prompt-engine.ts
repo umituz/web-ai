@@ -33,17 +33,19 @@ export function buildSystemPrompt(input: SystemPromptInput = {}): string {
   const identity = input.identity ?? DEFAULT_AI_IDENTITY;
   const parts = [identity, `Current date: ${now.toISOString().slice(0, 10)}.`];
 
+  const projectName = input.project?.name;
   const projectInstructions = input.project?.instructions?.trim();
-  if (projectInstructions) {
+  if (projectName && projectInstructions) {
     parts.push(
-      `The user is working inside the project "${input.project!.name}". Follow these project instructions:\n${projectInstructions}`,
+      `The user is working inside the project "${projectName}". Follow these project instructions:\n${projectInstructions}`,
     );
   }
 
+  const agentName = input.agent?.name;
   const agentInstructions = input.agent?.instructions?.trim();
-  if (agentInstructions) {
+  if (agentName && agentInstructions) {
     parts.push(
-      `You are operating as the agent "${input.agent!.name}". Follow these agent instructions:\n${agentInstructions}`,
+      `You are operating as the agent "${agentName}". Follow these agent instructions:\n${agentInstructions}`,
     );
   }
 

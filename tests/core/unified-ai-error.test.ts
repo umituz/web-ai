@@ -4,7 +4,6 @@ import {
   aiErrorMessage,
   errorFromStatus,
   errorFromUnknown,
-  STATUS_TO_CODE,
 } from '../../src/core/errors/unified-ai-error';
 
 describe('unified-ai-error', () => {

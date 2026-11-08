@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { searchWeb } from '../../src/core/search/web-search';
+import { type FetchLike, searchWeb } from '../../src/core/search/web-search';
 
 describe('searchWeb', () => {
   it('throws when TAVILY_API_KEY is missing', async () => {
@@ -9,7 +9,7 @@ describe('searchWeb', () => {
   });
 
   it('parses valid Tavily response and normalizes results', async () => {
-    const mockFetch = async () => {
+    const mockFetch: FetchLike = async () => {
       return new Response(
         JSON.stringify({
           query: 'TypeScript 5',
@@ -31,7 +31,7 @@ describe('searchWeb', () => {
     const res = await searchWeb(
       { TAVILY_API_KEY: 'test-key' },
       { query: 'TypeScript 5', includeAnswer: true },
-      mockFetch as any,
+      mockFetch,
     );
 
     expect(res.query).toBe('TypeScript 5');
@@ -42,7 +42,7 @@ describe('searchWeb', () => {
   });
 
   it('handles HTTP error gracefully', async () => {
-    const mockFetch = async () => {
+    const mockFetch: FetchLike = async () => {
       return new Response(
         JSON.stringify({ detail: 'Invalid API key provided' }),
         { status: 401, headers: { 'content-type': 'application/json' } },
@@ -50,7 +50,7 @@ describe('searchWeb', () => {
     };
 
     await expect(
-      searchWeb({ TAVILY_API_KEY: 'bad-key' }, { query: 'test' }, mockFetch as any),
+      searchWeb({ TAVILY_API_KEY: 'bad-key' }, { query: 'test' }, mockFetch),
     ).rejects.toThrow('Invalid API key provided');
   });
 });

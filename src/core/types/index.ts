@@ -16,9 +16,9 @@ export interface TokenUsage {
   readonly inputTokens: number;
   readonly outputTokens: number;
   readonly totalTokens?: number;
+  readonly reasoningTokens?: number;
 }
 
-/** What every text-generating method returns — usage is never discarded. */
 export interface GenerationResult {
   readonly text: string;
   readonly usage?: TokenUsage;
@@ -27,7 +27,6 @@ export interface GenerationResult {
   readonly finishReason?: FinishReason;
 }
 
-/** Universal chat message shape; providers translate to their own wire format. */
 export interface ChatMessage {
   readonly role: "system" | "user" | "assistant";
   readonly content: string;

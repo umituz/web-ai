@@ -129,6 +129,12 @@ describe("public API — @umituz/web-ai", () => {
       "BaseAIProvider",
       "isTextProvider",
       "isMediaProvider",
+      "createOpenAiCompatibleAdapter",
+      "createAnthropicAdapter",
+      "createOpenAiImageAdapter",
+      "createOpenAiEmbeddingsAdapter",
+      "createOpenAiAudioTranscriptionAdapter",
+      "createOpenAiSpeechAdapter",
     ]);
   });
 

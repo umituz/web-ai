@@ -169,3 +169,16 @@ export type {
   ImageSize,
   ImageQuality,
 } from "./images/openai-images";
+
+export { createOpenAiCompatibleAdapter } from "./adapters/openai-compatible.adapter";
+export { createAnthropicAdapter } from "./adapters/anthropic.adapter";
+export type {
+  ChatAdapter,
+  ProviderEvent,
+  AdapterRequest,
+  AdapterConfig,
+  RequestImage,
+  ToolDefinition,
+  AdapterChatMessage,
+  AdapterChatRole,
+} from "./adapters/adapter.types";
