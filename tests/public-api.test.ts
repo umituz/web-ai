@@ -120,6 +120,8 @@ describe("public API — @umituz/web-ai", () => {
       "useBlogGenerator",
       "useSocialContentGenerator",
       "useContentWizard",
+      "usePrunaGeneration",
+      "usePrunaProxy",
     ]);
   });
 
@@ -132,6 +134,7 @@ describe("public API — @umituz/web-ai", () => {
         "./core",
         "./providers",
         "./groq",
+        "./pruna",
         "./chat",
         "./content",
         "./wizard",

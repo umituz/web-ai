@@ -1,7 +1,23 @@
+import type {
+  PrunaInput,
+  GenerationStage,
+  PrunaModelId,
+  PrunaAspectRatio,
+  PrunaResolution,
+} from './client';
+import { generate, generateImageThenVideo } from './client';
 
 export interface PrunaRequest {
   model?: string;
   image?: string;
+  prompt?: string;
+  quality?: string;
+  duration?: number;
+  aspectRatio?: string;
+  aspect_ratio?: string;
+  motion?: number | string;
+  resolution?: string;
+  seed?: number;
   [key: string]: unknown;
 }
 
@@ -12,37 +28,8 @@ export interface PrunaProgressStage {
 }
 
 export interface PrunaCore {
-  generateWithPruna?: (
-    request: PrunaRequest,
-    apiKey: string,
-    signal?: AbortSignal,
-    onProgress?: (stage: PrunaProgressStage['stage'], attempt?: number) => void,
-  ) => AsyncGenerator<PrunaProgressStage>;
-  submitPrediction?: (
-    modelId: string,
-    request: PrunaRequest,
-    apiKey: string,
-    signal?: AbortSignal,
-    onProgress?: (stage: PrunaProgressStage['stage'], attempt?: number) => void,
-  ) => Promise<{ output?: { url?: string }; status_url?: string; generation_url?: string }>;
-  pollForResult?: (
-    pollUrl: string,
-    apiKey: string,
-    maxAttempts: number,
-    intervalMs: number,
-    signal?: AbortSignal,
-    onProgress?: (stage: PrunaProgressStage['stage'], attempt?: number) => void,
-  ) => Promise<string>;
-}
-
-let prunaCorePromise: Promise<PrunaCore> | null = null;
-
-async function loadPrunaCore(): Promise<PrunaCore> {
-  if (!prunaCorePromise) {
-    const specifier = '@umituz/pruna-provider/core';
-    prunaCorePromise = import(specifier) as Promise<PrunaCore>;
-  }
-  return prunaCorePromise;
+  generate?: typeof generate;
+  generateImageThenVideo?: typeof generateImageThenVideo;
 }
 
 export async function* generateWithPruna(
@@ -51,33 +38,94 @@ export async function* generateWithPruna(
   signal?: AbortSignal,
   onProgress?: (stage: PrunaProgressStage['stage'], attempt?: number) => void,
 ): AsyncGenerator<PrunaProgressStage> {
-  const prunaCore = await loadPrunaCore();
+  const stages: PrunaProgressStage[] = [];
+  let notify: (() => void) | null = null;
+  let done = false;
 
-  if (prunaCore.generateWithPruna) {
-    yield* prunaCore.generateWithPruna(request, apiKey, signal, onProgress);
-    return;
+  const wake = (): void => {
+    const fn = notify;
+    if (fn) {
+      notify = null;
+      fn();
+    }
+  };
+
+  const handleProgress = (stage: GenerationStage) => {
+    stages.push({ stage });
+    onProgress?.(stage);
+    wake();
+  };
+
+  const promise = (async () => {
+    try {
+      const model =
+        (request.model as PrunaModelId | undefined) ??
+        (request.image ? 'p-image-edit' : 'p-image');
+
+      if (model === 'p-video' && !request.image && request.prompt) {
+        // Text to video pipeline
+        const videoRes = await generateImageThenVideo(
+          apiKey,
+          {
+            prompt: request.prompt,
+            duration: request.duration ?? 5,
+            aspect_ratio: (request.aspectRatio ?? request.aspect_ratio ?? '16:9') as PrunaAspectRatio,
+          },
+          { signal, onProgress: handleProgress },
+        );
+        stages.push({
+          stage: 'polling',
+          result: { url: videoRes.url, model: 'p-video' },
+        });
+        return;
+      }
+
+      const input = {
+        model,
+        prompt: (request.prompt as string) ?? '',
+        aspect_ratio: (request.aspectRatio ?? request.aspect_ratio ?? '1:1') as PrunaAspectRatio,
+        ...(request.image ? { image: request.image as string } : {}),
+        ...(request.duration ? { duration: request.duration as number } : {}),
+        ...(request.resolution ? { resolution: request.resolution as PrunaResolution } : {}),
+        ...(request.seed !== undefined ? { seed: request.seed as number } : {}),
+      } as PrunaInput;
+
+      const res = await generate(apiKey, input, {
+        signal,
+        onProgress: handleProgress,
+      });
+
+      stages.push({
+        stage: 'polling',
+        result: { url: res.url, model: res.model },
+      });
+    } catch (err) {
+      stages.push({
+        stage: 'processing',
+        error: err instanceof Error ? err : new Error(String(err)),
+      });
+    } finally {
+      done = true;
+      wake();
+    }
+  })();
+
+  while (!done || stages.length > 0) {
+    if (stages.length === 0 && !done) {
+      await new Promise<void>((resolve) => {
+        notify = resolve;
+      });
+      notify = null;
+    }
+    while (stages.length > 0) {
+      const nextStage = stages.shift();
+      if (!nextStage) continue;
+      yield nextStage;
+      if (nextStage.error) {
+        throw nextStage.error;
+      }
+    }
   }
 
-  if (!prunaCore.submitPrediction || !prunaCore.pollForResult) {
-    throw new Error('@umituz/pruna-provider/core does not export required functions');
-  }
-
-  const modelId = request.model || (request.image ? 'p-image-edit' : 'p-image');
-  const prediction = await prunaCore.submitPrediction(modelId, request, apiKey, signal, onProgress);
-
-  if (prediction.output && typeof prediction.output === 'object' && 'url' in prediction.output) {
-    yield {
-      stage: 'predicting',
-      result: { url: prediction.output.url as string, model: modelId },
-    };
-    return;
-  }
-
-  const pollUrl = prediction.status_url || prediction.generation_url;
-  if (!pollUrl) {
-    throw new Error('Pruna prediction response missing polling URL');
-  }
-
-  const resultUrl = await prunaCore.pollForResult(pollUrl, apiKey, 60, 2000, signal, onProgress);
-  yield { stage: 'polling', result: { url: resultUrl, model: modelId } };
+  await promise;
 }

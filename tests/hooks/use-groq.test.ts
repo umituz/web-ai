@@ -2,7 +2,7 @@
 import { describe, expect, it, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { useGroq, type UseGroqReturn } from "../../src/hooks/use-groq.hook";
+import { useGroq } from "../../src/hooks/use-groq.hook";
 import {
   configureProvider,
   resetProvider,

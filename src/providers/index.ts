@@ -99,3 +99,31 @@ export { GeminiProvider, createGeminiProvider, GEMINI_TIERS } from "./gemini/gem
 export { FalProvider, createFalProvider } from "./fal/fal.provider";
 export { PrunaProvider, createPrunaProvider, generateWithPruna } from "./pruna/pruna.provider";
 export type { PrunaRequest, PrunaProgressStage } from "./pruna/pruna.provider";
+
+export {
+  generate as generatePruna,
+  generateImageThenVideo,
+  uploadImage,
+  submitPrediction,
+  pollForResult,
+  CancellationError,
+  AuthenticationError,
+  TimeoutError,
+  ValidationError,
+  GenerationFailedError,
+} from "./pruna/client";
+export type {
+  PrunaInput,
+  PrunaResult,
+  PrunaModelId,
+  PrunaAspectRatio,
+  PrunaResolution,
+  GenerationStage,
+  TextToImageInput,
+  ImageToImageInput,
+  ImageToVideoInput,
+  TextToVideoInput,
+  GenerateOptions,
+  PrunaPredictionResponse,
+  PrunaOutput,
+} from "./pruna/client";
