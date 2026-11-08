@@ -108,6 +108,12 @@ describe("public API — @umituz/web-ai", () => {
       "isTextTier",
       "AIError",
       "AIErrorType",
+      "searchWeb",
+      "SEARCH_MAX_RESULTS",
+      "buildSystemPrompt",
+      "canStartTask",
+      "planTaskFailure",
+      "batchEmbed",
     ]);
   });
 

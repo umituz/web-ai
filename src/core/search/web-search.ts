@@ -1,3 +1,5 @@
+import { AiError, errorFromStatus, errorFromUnknown } from '../errors/unified-ai-error';
+
 export type SearchTopic = 'general' | 'news';
 
 export interface WebSearchResult {
@@ -46,7 +48,7 @@ export async function searchWeb(
 ): Promise<WebSearchResponse> {
   const apiKey = env.TAVILY_API_KEY;
   if (!apiKey) {
-    throw new Error('Missing TAVILY_API_KEY configuration');
+    throw new AiError('missing_key');
   }
 
   const maxResults = Math.min(
@@ -59,38 +61,55 @@ export async function searchWeb(
   const body: Record<string, unknown> = { query: input.query, max_results: maxResults, topic };
   if (input.includeAnswer) body.include_answer = true;
 
-  const res = await fetchImpl(`${baseUrl}/search`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    let detail = `Tavily HTTP ${res.status}`;
-    try {
-      const parsed = (await res.json()) as { detail?: unknown };
-      if (typeof parsed?.detail === 'string') detail = parsed.detail;
-    } catch {
-      // ignore
-    }
-    throw new Error(detail);
+  let res: Response;
+  try {
+    res = await fetchImpl(`${baseUrl}/search`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    throw errorFromUnknown(err);
   }
 
-  const parsed = (await res.json()) as TavilyResponse;
-  const rawResults = Array.isArray(parsed.results) ? (parsed.results as TavilyResult[]) : [];
-  const results = rawResults
-    .filter((row) => typeof row.url === 'string' && row.url.length > 0)
-    .map((row) => ({
-      title: typeof row.title === 'string' ? row.title : '',
-      url: row.url as string,
-      content: typeof row.content === 'string' ? row.content : '',
-      score: typeof row.score === 'number' ? row.score : null,
-    }));
+  if (!res.ok) {
+    let detail: string | undefined;
+    try {
+      const parsed = (await res.json()) as { detail?: unknown };
+      const detailField = parsed?.detail;
+      if (Array.isArray(detailField)) {
+        detail = 'validation failed';
+      } else if (detailField && typeof detailField === 'object' && 'error' in detailField) {
+        const errorValue = (detailField as { error: unknown }).error;
+        if (typeof errorValue === 'string') detail = errorValue;
+      } else if (typeof detailField === 'string') {
+        detail = detailField;
+      }
+    } catch {
+      detail = undefined;
+    }
+    throw errorFromStatus(res.status, detail);
+  }
 
-  return {
-    query: typeof parsed.query === 'string' ? parsed.query : input.query,
-    answer: typeof parsed.answer === 'string' ? parsed.answer : null,
-    results,
-    responseTime: typeof parsed.response_time === 'number' ? parsed.response_time : null,
-  };
+  try {
+    const parsed = (await res.json()) as TavilyResponse;
+    const rawResults = Array.isArray(parsed.results) ? (parsed.results as TavilyResult[]) : [];
+    const results = rawResults
+      .filter((row) => typeof row.url === 'string' && row.url.length > 0)
+      .map((row) => ({
+        title: typeof row.title === 'string' ? row.title : '',
+        url: row.url as string,
+        content: typeof row.content === 'string' ? row.content : '',
+        score: typeof row.score === 'number' ? row.score : null,
+      }));
+
+    return {
+      query: typeof parsed.query === 'string' ? parsed.query : input.query,
+      answer: typeof parsed.answer === 'string' ? parsed.answer : null,
+      results,
+      responseTime: typeof parsed.response_time === 'number' ? parsed.response_time : null,
+    };
+  } catch (err) {
+    throw errorFromUnknown(err);
+  }
 }

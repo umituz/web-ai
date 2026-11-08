@@ -3,9 +3,9 @@ import { type FetchLike, searchWeb } from '../../src/core/search/web-search';
 
 describe('searchWeb', () => {
   it('throws when TAVILY_API_KEY is missing', async () => {
-    await expect(searchWeb({}, { query: 'test' })).rejects.toThrow(
-      'Missing TAVILY_API_KEY configuration',
-    );
+    await expect(searchWeb({}, { query: 'test' })).rejects.toMatchObject({
+      code: 'missing_key',
+    });
   });
 
   it('parses valid Tavily response and normalizes results', async () => {
