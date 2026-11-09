@@ -91,10 +91,10 @@ describe("useChat hook", () => {
     });
 
     expect(result.current.messages).toHaveLength(2);
-    expect(result.current.messages[0].sender).toBe("user");
-    expect(result.current.messages[0].content).toBe("Hi");
-    expect(result.current.messages[1].sender).toBe("assistant");
-    expect(result.current.messages[1].content).toBe("Hello back!");
+    expect(result.current.messages[0]?.sender).toBe("user");
+    expect(result.current.messages[0]?.content).toBe("Hi");
+    expect(result.current.messages[1]?.sender).toBe("assistant");
+    expect(result.current.messages[1]?.content).toBe("Hello back!");
     expect(result.current.isLoading).toBe(false);
 
     unmount();
@@ -141,7 +141,7 @@ describe("useChat hook", () => {
 
     // The user message should be present, but the streaming placeholder should be cleaned up!
     expect(result.current.messages).toHaveLength(1);
-    expect(result.current.messages[0].sender).toBe("user");
+    expect(result.current.messages[0]?.sender).toBe("user");
     expect(result.current.error).toBeDefined();
 
     unmount();
@@ -172,7 +172,7 @@ describe("useChat hook", () => {
     });
 
     expect(result.current.messages).toHaveLength(2);
-    expect(result.current.messages[1].content).toBe("Regenerated answer");
+    expect(result.current.messages[1]?.content).toBe("Regenerated answer");
 
     act(() => {
       result.current.clearMessages();

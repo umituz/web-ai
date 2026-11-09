@@ -43,8 +43,8 @@ describe('selectMemories', () => {
     const out = selectMemories(rows, 10, 45);
     expect(out).toHaveLength(2);
     expect(out[0]).toBe('a'.repeat(30));
-    expect(out[1].startsWith('b'.repeat(15))).toBe(true);
-    expect(out[1].endsWith('[truncated]')).toBe(true);
+    expect(out[1]?.startsWith('b'.repeat(15))).toBe(true);
+    expect(out[1]?.endsWith('[truncated]')).toBe(true);
   });
 
   it('ignores blank memories', () => {

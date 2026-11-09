@@ -61,6 +61,7 @@ export class ChatService implements IChatService {
     if (messages.length === 0) return null;
     const last = messages[messages.length - 1];
     const first = messages[0];
+    if (!last || !first) return null;
     const companionId = String(first.metadata?.["companionId"] ?? "unknown");
     const companionName = String(first.metadata?.["companionName"] ?? "Unknown");
     return {

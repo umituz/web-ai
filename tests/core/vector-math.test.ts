@@ -30,10 +30,10 @@ describe('vector-math', () => {
 
     const top = findTopKSimilar(query, candidates, 2);
     expect(top).toHaveLength(2);
-    expect(top[0].id).toBe('identical');
-    expect(top[0].similarity).toBeCloseTo(1, 5);
-    expect(top[1].id).toBe('diagonal');
-    expect(top[1].similarity).toBeCloseTo(Math.SQRT1_2, 5);
+    expect(top[0]?.id).toBe('identical');
+    expect(top[0]?.similarity).toBeCloseTo(1, 5);
+    expect(top[1]?.id).toBe('diagonal');
+    expect(top[1]?.similarity).toBeCloseTo(Math.SQRT1_2, 5);
   });
 
   it('batchEmbed slices into chunks and aggregates vectors and tokens', async () => {

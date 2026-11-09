@@ -35,7 +35,7 @@ export function dotProduct(a: readonly number[], b: readonly number[]): number {
   const length = Math.min(a.length, b.length);
   let sum = 0;
   for (let i = 0; i < length; i += 1) {
-    sum += a[i] * b[i];
+    sum += (a[i] ?? 0) * (b[i] ?? 0);
   }
   return sum;
 }
@@ -43,7 +43,7 @@ export function dotProduct(a: readonly number[], b: readonly number[]): number {
 export function magnitude(v: readonly number[]): number {
   let sum = 0;
   for (let i = 0; i < v.length; i += 1) {
-    sum += v[i] * v[i];
+    sum += (v[i] ?? 0) * (v[i] ?? 0);
   }
   return Math.sqrt(sum);
 }

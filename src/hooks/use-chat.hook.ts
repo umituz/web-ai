@@ -220,7 +220,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
 
     const trimmed =
       currentMessages.length > 0 &&
-      currentMessages[currentMessages.length - 1].sender === "assistant"
+      currentMessages[currentMessages.length - 1]?.sender === "assistant"
         ? currentMessages.slice(0, -1)
         : currentMessages;
 
@@ -242,7 +242,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
 
       setMessages((prev) => {
         const lastIsAI =
-          prev.length > 0 && prev[prev.length - 1].sender === "assistant";
+          prev.length > 0 && prev[prev.length - 1]?.sender === "assistant";
         const base = lastIsAI ? prev.slice(0, -1) : prev;
         return [...base, aiResponse];
       });

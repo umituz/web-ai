@@ -38,7 +38,7 @@ describe('searchWeb', () => {
     expect(res.answer).toBe('TypeScript 5 is great.');
     expect(res.responseTime).toBe(0.42);
     expect(res.results).toHaveLength(1);
-    expect(res.results[0].title).toBe('TS 5 Announcement');
+    expect(res.results[0]?.title).toBe('TS 5 Announcement');
   });
 
   it('handles HTTP error gracefully', async () => {

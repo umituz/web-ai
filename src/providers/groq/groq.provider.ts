@@ -124,7 +124,7 @@ export class GroqProvider implements ITextProvider {
     }
 
     const structuredPrompt = new StructuredPromptBuilder(
-      messages[lastUserIndex].content,
+      messages[lastUserIndex]?.content ?? "",
     )
       .withSchema(request.schema)
       .build();
@@ -259,7 +259,8 @@ export function createGroqProvider(config: GroqProviderConfig): GroqProvider {
 
 function findLastIndex<T>(items: ReadonlyArray<T>, predicate: (item: T) => boolean): number {
   for (let i = items.length - 1; i >= 0; i--) {
-    if (predicate(items[i])) return i;
+    const item = items[i];
+    if (item !== undefined && predicate(item)) return i;
   }
   return -1;
 }

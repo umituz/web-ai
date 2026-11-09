@@ -39,7 +39,7 @@ describe("TextGenerationService model resolution", () => {
 
     await service.generateChatCompletion([{ role: "user", content: "hi" }]);
 
-    expect(requests[0].model).toBe("openai/gpt-oss-120b");
+    expect(requests[0]?.model).toBe("openai/gpt-oss-120b");
   });
 
   it("falls back to the package default without an injected model", async () => {
@@ -48,7 +48,7 @@ describe("TextGenerationService model resolution", () => {
 
     await service.generateChatCompletion([{ role: "user", content: "hi" }]);
 
-    expect(requests[0].model).toBe("llama-3.1-8b-instant");
+    expect(requests[0]?.model).toBe("llama-3.1-8b-instant");
   });
 
   it("prefers an explicit per-call model over the injected default", async () => {
@@ -57,7 +57,7 @@ describe("TextGenerationService model resolution", () => {
 
     await service.generateChatCompletion([{ role: "user", content: "hi" }], { model: "openai/gpt-oss-20b" });
 
-    expect(requests[0].model).toBe("openai/gpt-oss-20b");
+    expect(requests[0]?.model).toBe("openai/gpt-oss-20b");
   });
 
   it("acts as an ITextProvider and generates text with metadata", async () => {
@@ -71,6 +71,6 @@ describe("TextGenerationService model resolution", () => {
 
     expect(result.text).toBe("ok");
     expect(result.model).toBe("llama-3.1-8b-instant");
-    expect(requests[0].messages).toEqual([{ role: "user", content: "hello world" }]);
+    expect(requests[0]?.messages).toEqual([{ role: "user", content: "hello world" }]);
   });
 });

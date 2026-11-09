@@ -116,7 +116,9 @@ export function useAIGeneration(options: UseAIGenerationOptions): UseAIGeneratio
 
       const urls: string[] = [];
       for (let i = 0; i < files.length; i++) {
-        const url = await uploadPhoto(files[i], userId);
+        const file = files[i];
+        if (!file) continue;
+        const url = await uploadPhoto(file, userId);
         urls.push(url);
         setProgress({
           stage: 'uploading',

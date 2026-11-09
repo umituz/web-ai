@@ -213,7 +213,7 @@ export class GeminiProvider extends BaseProvider implements ITextProvider, IMedi
     }
     messages[lastUserIndex] = {
       role: 'user',
-      content: new StructuredPromptBuilder(messages[lastUserIndex].content)
+      content: new StructuredPromptBuilder(messages[lastUserIndex]?.content ?? '')
         .withSchema(request.schema)
         .build(),
     };
@@ -348,7 +348,8 @@ function mapGeminiFinishReason(reason: string | undefined) {
 
 function findLastIndex<T>(items: ReadonlyArray<T>, predicate: (item: T) => boolean): number {
   for (let i = items.length - 1; i >= 0; i--) {
-    if (predicate(items[i])) return i;
+    const item = items[i];
+    if (item !== undefined && predicate(item)) return i;
   }
   return -1;
 }

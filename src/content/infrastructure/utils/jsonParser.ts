@@ -18,7 +18,7 @@ export function safeJSONParse<T>(text: string, fallback: T, onError?: (context: 
     }
     if (error instanceof SyntaxError) {
       const positionMatch = error.message.match(/position (\d+)/);
-      const position = positionMatch ? parseInt(positionMatch[1], 10) : -1;
+      const position = positionMatch ? parseInt(positionMatch[1] ?? '', 10) : -1;
       if (position > 0) {
         const context = text.substring(Math.max(0, position - 50), position + 50);
         onError?.(`JSON parse error at position ${position}: "${context}"`);

@@ -124,7 +124,7 @@ describe("ChatService", () => {
     service.setStorage(mockStorage);
     const convs = await service.getConversations();
     expect(convs).toHaveLength(1);
-    expect(convs[0].id).toBe("conv-1");
+    expect(convs[0]?.id).toBe("conv-1");
   });
 
   it("extracts token usage correctly from assistant message metadata", () => {

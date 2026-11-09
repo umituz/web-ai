@@ -33,7 +33,7 @@ describe('chunkText splitting', () => {
     for (const chunk of chunks) {
       expect(chunk.length).toBeLessThanOrEqual(CHUNK_MAX_CHARS);
     }
-    expect(chunks[0].endsWith('.')).toBe(true);
+    expect(chunks[0]?.endsWith('.')).toBe(true);
   });
 
   it('overflows carry context into the next chunk', () => {
@@ -41,7 +41,7 @@ describe('chunkText splitting', () => {
     const text = sentence.repeat(60);
     const chunks = chunkText(text);
     for (let i = 1; i < chunks.length; i += 1) {
-      expect(chunks[i].length).toBeLessThanOrEqual(CHUNK_MAX_CHARS);
+      expect(chunks[i]?.length).toBeLessThanOrEqual(CHUNK_MAX_CHARS);
     }
     expect(chunks.length).toBeGreaterThan(2);
   });
@@ -62,7 +62,7 @@ describe('chunkText splitting', () => {
     const tail = chunks[chunks.length - 1];
     expect(tail).toContain('token299');
     expect(chunks[0]).toContain('token0');
-    expect(chunks[0].length).toBeLessThanOrEqual(400);
+    expect(chunks[0]?.length).toBeLessThanOrEqual(400);
   });
 });
 

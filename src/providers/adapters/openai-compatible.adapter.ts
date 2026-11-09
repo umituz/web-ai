@@ -60,7 +60,7 @@ function mergeImages(messages: readonly WireMessage[], images: readonly RequestI
   }));
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
-    if (message.role !== 'user') continue;
+    if (!message || message.role !== 'user') continue;
     const textParts: readonly WireContentPart[] =
       typeof message.content === 'string'
         ? message.content.length > 0

@@ -184,7 +184,7 @@ describe("AnthropicProvider generation", () => {
 
     const provider = new AnthropicProvider({ apiKey: "k" });
     await expect(provider.healthCheck()).resolves.toBe("healthy");
-    expect(String(fetchMock.mock.calls[0][0])).toContain("/v1/models");
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("/v1/models");
   });
 
   it("builds structured requests through the schema-wrapped prompt", async () => {

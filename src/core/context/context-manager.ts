@@ -38,6 +38,7 @@ export function buildContext<T extends ContextMessage = ContextMessage>(
   const selected: T[] = [];
   for (let i = history.length - 1; i >= 0; i -= 1) {
     const message = history[i];
+    if (!message) continue;
     const cost = estimateMessageTokens(message);
     if (used + cost > available && selected.length > 0) break;
     used += cost;
@@ -45,7 +46,7 @@ export function buildContext<T extends ContextMessage = ContextMessage>(
   }
 
   selected.reverse();
-  while (selected.length > 1 && (selected[0].role === 'assistant' || selected[0].role === 'tool')) {
+  while (selected.length > 1 && (selected[0]?.role === 'assistant' || selected[0]?.role === 'tool')) {
     selected.shift();
   }
 

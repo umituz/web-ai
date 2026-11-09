@@ -47,7 +47,7 @@ describe('safeJSONParse', () => {
     const onError = vi.fn();
     safeJSONParse('{broken', 'fallback', onError);
     expect(onError).toHaveBeenCalledTimes(1);
-    expect(onError.mock.calls[0][0]).toContain('JSON parse error');
+    expect(onError.mock.calls[0]?.[0]).toContain('JSON parse error');
   });
 });
 

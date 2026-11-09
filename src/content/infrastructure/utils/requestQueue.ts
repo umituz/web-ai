@@ -235,7 +235,7 @@ export async function batchRequest<T>(
         errors.push(result.reason);
         if (stopOnError) {
           throw new Error(
-            `Batch request failed: ${errors[0].message}`
+            `Batch request failed: ${errors[0]?.message}`
           );
         }
       }
