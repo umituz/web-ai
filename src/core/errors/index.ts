@@ -30,3 +30,4 @@ export {
   CODE_MESSAGES,
 } from "./unified-ai-error";
 export type { AiErrorCode, ProviderErrorShape } from "./unified-ai-error";
+export { AI_ERROR_STATUS, aiErrorStatus } from "./error-status";

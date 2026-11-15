@@ -217,7 +217,7 @@ export function createAnthropicAdapter(config: AdapterConfig): ChatAdapter {
             model: req.externalModelId,
             messages,
             ...(system.length > 0 ? { system } : {}),
-            max_tokens: req.maxOutputTokens,
+            max_tokens: req.maxOutputTokens ?? 4096,
             stream: true,
           }),
           signal,

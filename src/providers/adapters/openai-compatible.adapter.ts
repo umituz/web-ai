@@ -161,6 +161,11 @@ async function* parseSseStream(body: ReadableStream<Uint8Array>): AsyncIterable<
 }
 
 export function createOpenAiCompatibleAdapter(config: AdapterConfig): ChatAdapter {
+  if (!config.baseUrl && !config.endpointUrl) {
+    throw new Error('createOpenAiCompatibleAdapter requires baseUrl or endpointUrl');
+  }
+  const endpoint = config.endpointUrl ?? `${config.baseUrl}/chat/completions`;
+
   return {
     async *stream(req: AdapterRequest): AsyncIterable<ProviderEvent> {
       const timeout = AbortSignal.timeout(config.timeoutMs);
@@ -168,7 +173,7 @@ export function createOpenAiCompatibleAdapter(config: AdapterConfig): ChatAdapte
 
       let response: Response;
       try {
-        response = await fetch(`${config.baseUrl}/chat/completions`, {
+        response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${config.apiKey}`,

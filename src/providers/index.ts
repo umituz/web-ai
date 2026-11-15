@@ -98,6 +98,74 @@ export type {
 
 export { GeminiProvider, createGeminiProvider, GEMINI_TIERS } from "./gemini/gemini.provider";
 export { FalProvider, createFalProvider } from "./fal/fal.provider";
+export {
+  OpenAiCompatibleProvider,
+  createOpenAiCompatibleProvider,
+} from "./openai-compatible/openai-compatible.provider";
+export type {
+  OpenAiCompatibleProviderConfig,
+} from "./openai-compatible/openai-compatible.entities";
+
+/* Cloudflare Workers AI — binding-driven text + speech (env.AI, no apiKey). */
+export {
+  WorkersAIProvider,
+  createWorkersAIProvider,
+  WORKERS_AI_TIERS,
+} from "./workers-ai/workers-ai.provider";
+export {
+  WorkersAIError,
+} from "./workers-ai/workers-ai.entities";
+export type {
+  WorkersAIBinding,
+  WorkersAIEnv,
+  WorkersAIMessage,
+  WorkersAIProviderConfig,
+} from "./workers-ai/workers-ai.entities";
+export {
+  runWorkersAIText,
+  streamWorkersAIText,
+  workersAIConfigured,
+  WORKERS_AI_LLM_MODEL,
+} from "./workers-ai/workers-ai.text";
+export type { WorkersAITextOptions } from "./workers-ai/workers-ai.text";
+export {
+  speakWithWorkersAI,
+} from "./workers-ai/workers-ai.speech";
+export type {
+  WorkersAISpeechEngine,
+  WorkersAISpeechResult,
+} from "./workers-ai/workers-ai.speech";
+
+/* fal.ai QUEUE lane — async submit → poll → harvest (long-running models). */
+export {
+  createFalQueue,
+  falQueueConfigured,
+} from "./fal/queue/fal-queue.client";
+export type { FalQueueClient } from "./fal/queue/fal-queue.client";
+export { FalQueueError, FAL_ASPECT_IMAGE_SIZES } from "./fal/queue/fal-queue.entities";
+export type {
+  FalQueueEnv,
+  FalJobStatus,
+  FalSubmitResponse,
+  FalStatusResponse,
+  FalSubmittedJob,
+  FalStatusSnapshot,
+  FalJobInput,
+  FalJobOutput,
+  FalVideoModelSpec,
+  FalAudioModelSpec,
+} from "./fal/queue/fal-queue.entities";
+export {
+  buildFalImageInput,
+  buildFalVideoInput,
+  buildFalAudioInput,
+  buildFalTagPrompt,
+  buildFalAudioLyrics,
+  parseFalImageOutput,
+  parseFalVideoOutput,
+  parseFalAudioOutput,
+} from "./fal/queue/fal-wire";
+
 export { PrunaProvider, createPrunaProvider, generateWithPruna } from "./pruna/pruna.provider";
 export type { PrunaRequest, PrunaProgressStage } from "./pruna/pruna.provider";
 
@@ -182,3 +250,30 @@ export type {
   AdapterChatMessage,
   AdapterChatRole,
 } from "./adapters/adapter.types";
+export {
+  createAdapterResolver,
+  chatAdapterFor,
+  imageAdapterFor,
+  embeddingsAdapterFor,
+  audioTranscriptionAdapterFor,
+  speechAdapterFor,
+  resolveApiKey,
+  apiKeyAvailable,
+  ADAPTER_TIMEOUT_MS,
+  ADAPTER_MEDIA_TIMEOUT_MS,
+} from "./adapters/adapter-resolver";
+export type {
+  AdapterProviderBinding,
+  AdapterEnvBinding,
+  AdapterResolver,
+  AdapterResolverTiming,
+} from "./adapters/adapter-resolver";
+export { runConversation } from "./execution/run-conversation";
+export type {
+  ConversationAttempt,
+  ConversationAttemptModel,
+  ConversationAttemptSettings,
+  ConversationEvent,
+  ConversationTurnResult,
+  RunConversationInput,
+} from "./execution/run-conversation";

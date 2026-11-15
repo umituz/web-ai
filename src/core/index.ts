@@ -106,6 +106,33 @@ export type {
   ZodLikeSchema,
 } from "./tools/tool-validator";
 export {
+  AI_ERROR_STATUS,
+  aiErrorStatus,
+} from "./errors/error-status";
+export {
+  buildUsageDailySeries,
+  usageWindowTotals,
+  usageTrendOf,
+  errorRatePct,
+} from "./analytics/usage-series";
+export type {
+  UsageSeriesPoint,
+  UsageSeriesDayRow,
+  UsageSeriesMessageRow,
+  UsageWindowTotals,
+  UsageTrendPoint,
+} from "./analytics/usage-series";
+export {
+  createRemoteChatClient,
+} from "./remote/remote-chat-client";
+export type {
+  RemoteChatClient,
+  RemoteChatStreamBody,
+  RemoteChatUrls,
+  RemoteChatClientOptions,
+  RemoteStreamHandle,
+} from "./remote/remote-chat-client";
+export {
   SSE_PREFIX,
   SSE_DONE_MARKER,
   JSON_CODE_BLOCK_PATTERN,

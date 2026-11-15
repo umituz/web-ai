@@ -8,6 +8,10 @@ import type { GroqProviderConfig } from "../groq/groq.entities";
 import { GeminiProvider } from "../gemini/gemini.provider";
 import { FalProvider } from "../fal/fal.provider";
 import { PrunaProvider } from "../pruna/pruna.provider";
+import { OpenAiCompatibleProvider } from "../openai-compatible/openai-compatible.provider";
+import type { OpenAiCompatibleProviderConfig } from "../openai-compatible/openai-compatible.entities";
+import { WorkersAIProvider } from "../workers-ai/workers-ai.provider";
+import type { WorkersAIProviderConfig } from "../workers-ai/workers-ai.entities";
 import type {
   FalConfig,
   GeminiConfig,
@@ -42,6 +46,13 @@ export interface AIProviderConfig {
   gemini?: Omit<GeminiConfig, "enabled">;
   fal?: Omit<FalConfig, "enabled">;
   pruna?: Omit<PrunaConfig, "enabled">;
+  /** Any OpenAI-compatible endpoint (OpenAI, OpenRouter, vLLM, LiteLLM,
+   *  Cloudflare AI Gateway) addressed by URL — the gateway shape apps
+   *  deploy behind instead of a named vendor key. */
+  openaiCompatible?: Omit<OpenAiCompatibleProviderConfig, "apiKey"> & { apiKey?: string };
+  /** Cloudflare Workers AI over the `env.AI` binding — no apiKey; the
+   *  binding's presence IS the enabled flag (free-tier text lane). */
+  workersAI?: WorkersAIProviderConfig;
 }
 
 export function createAI(config: AIProviderConfig = {}): ProviderFactory {
@@ -65,6 +76,18 @@ export function createAI(config: AIProviderConfig = {}): ProviderFactory {
   }
   if (config.pruna?.apiKey) {
     factory.register(new PrunaProvider({ ...config.pruna, enabled: true } as PrunaConfig));
+  }
+  const openaiCompatible = config.openaiCompatible;
+  if (
+    openaiCompatible?.apiKey &&
+    (openaiCompatible.baseUrl || openaiCompatible.endpointUrl)
+  ) {
+    factory.register(
+      new OpenAiCompatibleProvider({ ...openaiCompatible, apiKey: openaiCompatible.apiKey }),
+    );
+  }
+  if (config.workersAI?.binding) {
+    factory.register(new WorkersAIProvider(config.workersAI));
   }
 
   return factory;

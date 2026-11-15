@@ -26,9 +26,11 @@ export interface ToolDefinition {
 export interface AdapterRequest {
   readonly externalModelId: string;
   readonly messages: readonly AdapterChatMessage[];
-  readonly temperature: number;
-  readonly maxOutputTokens: number;
-  readonly topP: number;
+  /** Sampling hints — absent fields stay off the wire (undefined keys are
+   *  dropped by JSON.stringify), matching callers that specify none. */
+  readonly temperature?: number;
+  readonly maxOutputTokens?: number;
+  readonly topP?: number;
   readonly tools?: readonly ToolDefinition[];
   readonly images?: readonly RequestImage[];
   readonly signal?: AbortSignal;
@@ -44,7 +46,11 @@ export interface ChatAdapter {
 }
 
 export interface AdapterConfig {
-  readonly baseUrl: string;
+  /** API root, e.g. https://api.openai.com/v1 — /chat/completions is appended. */
+  readonly baseUrl?: string;
+  /** Full endpoint URL; wins over baseUrl. Gateways (Cloudflare AI Gateway,
+   *  OpenRouter proxies) hand out the complete chat-completions URL. */
+  readonly endpointUrl?: string;
   readonly apiKey: string;
   readonly timeoutMs: number;
 }

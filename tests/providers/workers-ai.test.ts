@@ -243,7 +243,8 @@ describe('WorkersAIProvider', () => {
 
   it('streams via callbacks and completes with the joined text', async () => {
     const env = envWith(async () => sseBody(['data: {"response": "ab"}', 'data: {"response": "cd"}']));
-    const provider = new WorkersAIProvider({ binding: env.AI! });
+    if (!env.AI) throw new Error('envWith must set AI');
+    const provider = new WorkersAIProvider({ binding: env.AI });
     const chunks: string[] = [];
     let completed = '';
     const result = await provider.stream({ messages: MESSAGES }, {

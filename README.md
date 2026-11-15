@@ -62,15 +62,41 @@ for await (const chunk of ai.streamText(request)) render(chunk);
 | Entry | Contents | React? |
 |---|---|---|
 | `@umituz/web-ai` | `createAI`, `ProviderFactory`, providers, core types — **root is Workers-safe** | no |
-| `/core` | errors, executor strategies (dedupe→retry→queue), cache, SSE bridge, tiers | no |
-| `/providers` | provider classes + factory | no |
+| `/core` | errors, executor strategies (dedupe→retry→queue), cache, SSE bridge, tiers, usage analytics, remote chat client | no |
+| `/providers` | provider classes + factory, adapter resolver, `runConversation` | no |
 | `/chat` | `ChatService`, chat entities, `IChatStorage` | no |
 | `/content` | content domain, 9 services, `PromptBuilder`, `GenerationExecutor` | no |
 | `/wizard` | content wizard flows | no |
-| `/hooks` | React hooks: `useChat`, `useText`, `useAIContent`, wizards… | **yes** |
+| `/hooks` | React hooks: `useChat`, `useText`, `useRemoteChat`, `useAIContent`, wizards… | **yes** |
 
 React and `@umituz/pruna-provider` are optional peer dependencies — install
 them only if you use `/hooks` or the Pruna media provider.
+
+## Server-side chat endpoints
+
+The pieces a backend-proxy chat stack needs, all persistence-free:
+
+- `runConversation(input)` — the turn engine: ordered failover attempts over
+  `ChatAdapter`s, per-attempt context windowing (`buildContext`), answer /
+  reasoning / usage / tool-call reduction, abort → `stopped`. Yield events and
+  persist them your way.
+- `sseStreamResponse(events)` / `replayFirst` — wrap the generator into an SSE
+  `Response` (Workers/hono compatible).
+- `createAdapterResolver(env)` — provider binding (`{ adapter, baseUrl,
+  apiKeyEnv }`) → concrete adapter, for chat/image/embeddings/transcription/
+  speech, with `available()` probing.
+- `AI_ERROR_STATUS` / `aiErrorStatus(code)` — map `AiErrorCode` onto HTTP
+  statuses for route error handling.
+- `buildUsageDailySeries` / `usageWindowTotals` / `usageTrendOf` /
+  `errorRatePct` — turn sparse SQL day aggregates into zero-filled usage
+  series and dashboard math.
+
+## Client-side chat over your own backend
+
+`createRemoteChatClient({ urls })` POSTs to your chat endpoint and replays the
+SSE stream (`streamChat`, `resolveToolCall`); `useRemoteChat({ client })`
+owns the message-list state machine — optimistic user echo, streaming
+placeholder, delta/usage/error/done patches, tool approval, abort tracking.
 
 ## Migration from the old packages
 
