@@ -143,6 +143,9 @@ describe("public API — @umituz/web-ai", () => {
       "usageTrendOf",
       "errorRatePct",
       "createRemoteChatClient",
+      "aiFailureOf",
+      "createAllowanceWindow",
+      "isValidApiKey",
     ]);
   });
 
@@ -179,6 +182,9 @@ describe("public API — @umituz/web-ai", () => {
       "chatAdapterFor",
       "resolveApiKey",
       "runConversation",
+      "configureProvider",
+      "getProvider",
+      "bootProvider",
     ]);
   });
 

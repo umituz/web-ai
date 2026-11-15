@@ -5,6 +5,8 @@ import { GroqHttpTransport } from "./groq-http-transport";
 import { TextGenerationService } from "./text-generation.service";
 import { ChatService } from "../../chat/services/chat.service";
 import { CacheManager } from "../../core/utils/cache-manager";
+import { isValidApiKey } from "../../core/utils/api-key-validator";
+import { GROQ_MODELS } from "./groq.constants";
 
 export interface AppContainer {
   readonly groqHttpClient: GroqHttpClient;
@@ -38,4 +40,18 @@ export function getProvider(): AppContainer | null {
 export function resetProvider(): void {
   container?.groqHttpClient.reset();
   container = null;
+}
+
+export interface BootProviderOptions {
+  readonly timeoutMs?: number;
+  readonly textModel?: string;
+}
+
+export function bootProvider(apiKey: string | undefined, options: BootProviderOptions = {}): AppContainer | null {
+  if (!isValidApiKey(apiKey)) return null;
+  return getProvider() ?? configureProvider({
+    apiKey: apiKey.trim(),
+    timeoutMs: options.timeoutMs ?? 30_000,
+    textModel: options.textModel ?? GROQ_MODELS.GPT_OSS_120B,
+  });
 }

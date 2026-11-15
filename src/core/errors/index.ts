@@ -31,3 +31,5 @@ export {
 } from "./unified-ai-error";
 export type { AiErrorCode, ProviderErrorShape } from "./unified-ai-error";
 export { AI_ERROR_STATUS, aiErrorStatus } from "./error-status";
+export { aiFailureOf } from "./ai-failure";
+export type { AiFailure } from "./ai-failure";

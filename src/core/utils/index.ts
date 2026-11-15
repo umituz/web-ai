@@ -27,3 +27,5 @@ export {
 export type { FailoverErrorLike, ModelWithProvider } from "./failover";
 export { deriveConversationTitle } from "./title";
 export type { DeriveTitleOptions } from "./title";
+export { createAllowanceWindow, DEFAULT_ALLOWANCE_WINDOW_MS } from "./allowance-window";
+export type { AllowanceWindow, AllowanceWindowOptions } from "./allowance-window";

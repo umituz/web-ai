@@ -77,8 +77,9 @@ export {
   configureProvider,
   getProvider,
   resetProvider,
+  bootProvider,
 } from "./groq/groq-container";
-export type { AppContainer } from "./groq/groq-container";
+export type { AppContainer, BootProviderOptions } from "./groq/groq-container";
 export type {
   GroqProviderConfig,
   GroqConfig,
