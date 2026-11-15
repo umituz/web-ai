@@ -3,6 +3,8 @@ import {
   canStartTask,
   nextAttemptDelayMs,
   planTaskFailure,
+  planStuckRecovery,
+  STUCK_TASK_THRESHOLD_MS,
   DEFAULT_TASK_POLICIES,
 } from '../../src/core/calculations/task-policy';
 
@@ -65,6 +67,29 @@ describe('planTaskFailure', () => {
   it('keeps the log entry timestamped', () => {
     const plan = planTaskFailure({ attempts: 1, maxAttempts: 2 }, 'boom', 1000, NOW);
     expect(plan.log.at).toBe(NOW.toISOString());
+  });
+});
+
+describe('planStuckRecovery', () => {
+  it('leaves fresh running tasks alone', () => {
+    const updatedAt = new Date(NOW.getTime() - 60_000);
+    expect(planStuckRecovery({ attempts: 1, maxAttempts: 3, updatedAt }, NOW)).toBeNull();
+  });
+
+  it('requeues stale tasks while attempts remain', () => {
+    const updatedAt = new Date(NOW.getTime() - STUCK_TASK_THRESHOLD_MS - 1000);
+    expect(planStuckRecovery({ attempts: 1, maxAttempts: 3, updatedAt }, NOW)).toEqual({ action: 'requeue' });
+  });
+
+  it('fails stale tasks whose attempts are exhausted', () => {
+    const updatedAt = new Date(NOW.getTime() - STUCK_TASK_THRESHOLD_MS - 1000);
+    expect(planStuckRecovery({ attempts: 3, maxAttempts: 3, updatedAt }, NOW)).toEqual({ action: 'fail' });
+  });
+
+  it('honours a custom threshold', () => {
+    const updatedAt = new Date(NOW.getTime() - 5000);
+    expect(planStuckRecovery({ attempts: 1, maxAttempts: 3, updatedAt }, NOW, 1000)).toEqual({ action: 'requeue' });
+    expect(planStuckRecovery({ attempts: 1, maxAttempts: 3, updatedAt }, NOW, 10_000)).toBeNull();
   });
 });
 

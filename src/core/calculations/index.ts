@@ -33,10 +33,14 @@ export {
   nextAttemptDelayMs,
   canStartTask,
   planTaskFailure,
+  planStuckRecovery,
+  STUCK_TASK_THRESHOLD_MS,
   DEFAULT_TASK_POLICIES,
 } from "./task-policy";
 export type {
   TaskPolicy,
   TaskState,
   TaskPlan,
+  StuckTaskState,
+  StuckTaskPlan,
 } from "./task-policy";

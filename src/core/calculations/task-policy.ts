@@ -64,3 +64,29 @@ export function planTaskFailure(
     },
   };
 }
+
+/** A task found in `running` is considered stuck after this long. */
+export const STUCK_TASK_THRESHOLD_MS = 15 * 60 * 1000;
+
+export interface StuckTaskState {
+  readonly attempts: number;
+  readonly maxAttempts: number;
+  readonly updatedAt: Date;
+}
+
+export type StuckTaskPlan = { readonly action: 'requeue' } | { readonly action: 'fail' };
+
+/**
+ * Pure recovery decision for a task found in `running`: null means it is
+ * fresh, leave it alone. Stale with attempts left → requeue; stale and
+ * exhausted → fail (avoids endless requeue loops). The claiming worker may
+ * be gone (ephemeral isolates), so nothing else would ever finish it.
+ */
+export function planStuckRecovery(
+  task: StuckTaskState,
+  now: Date = new Date(),
+  thresholdMs: number = STUCK_TASK_THRESHOLD_MS,
+): StuckTaskPlan | null {
+  if (now.getTime() - task.updatedAt.getTime() < thresholdMs) return null;
+  return task.attempts >= task.maxAttempts ? { action: 'fail' } : { action: 'requeue' };
+}

@@ -93,6 +93,8 @@ export type { GenerationSettings } from "./settings/generation-settings";
 export {
   readSseResponse,
   parseSseEvent,
+  iterateSseData,
+  iterateSseJson,
 } from "./sse/browser-sse-reader";
 export type { StreamCallbacks, ParsedSseEvent } from "./sse/browser-sse-reader";
 export {

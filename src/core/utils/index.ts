@@ -25,3 +25,5 @@ export {
   TRANSIENT_ERROR_CODES,
 } from "./failover";
 export type { FailoverErrorLike, ModelWithProvider } from "./failover";
+export { deriveConversationTitle } from "./title";
+export type { DeriveTitleOptions } from "./title";

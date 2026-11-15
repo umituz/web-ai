@@ -69,23 +69,79 @@ export async function readSseResponse<TToolCall = unknown>(
     return;
   }
 
-  const reader = response.body.getReader();
+  for await (const event of iterateSseJson<ParsedSseEvent<TToolCall>>(response)) {
+    if (event) dispatchSseEvent(event, callbacks);
+  }
+}
+
+/* ---------- generic SSE data-frame layer ----------
+   Protocol-generic: yields an event's data payload with zero vocabulary
+   of its own, so any JSON-over-SSE protocol consumes it without the
+   provider-specific ParsedSseEvent shapes above. */
+
+/** The joined `data:` payload of one SSE frame, or null when the frame
+ *  carries none (or only empty payloads). Multiple data lines concatenate
+ *  with '\n' per the SSE spec. */
+function dataPayloadOf(frame: string): string | null {
+  let data: string | null = null;
+  for (const line of frame.split('\n')) {
+    if (line.startsWith('data:')) {
+      const payload = line.slice(5).trim();
+      data = data === null ? payload : `${data}\n${payload}`;
+    }
+  }
+  return data !== null && data.length > 0 ? data : null;
+}
+
+/** Yield each SSE event's data payload from a Response (or its raw body).
+ *  A payload split across network chunks reassembles before it yields;
+ *  frames without data never surface. The reader is always released AND
+ *  the body cancelled — including when the consumer breaks out of the
+ *  loop early, throws inside it, or the stream errors mid-read. */
+export async function* iterateSseData(
+  source: Response | ReadableStream<Uint8Array>,
+): AsyncGenerator<string> {
+  const body = source instanceof Response ? source.body : source;
+  if (!body) {
+    throw new Error('iterateSseData: the response has no body to read');
+  }
+
+  const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+      let boundary = buffer.indexOf('\n\n');
+      while (boundary !== -1) {
+        const frame = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+        boundary = buffer.indexOf('\n\n');
+        const data = dataPayloadOf(frame);
+        if (data) yield data;
+      }
+    }
+  } finally {
+    // cancel(), not just releaseLock(): an abandoned iteration must drop
+    // the connection instead of leaving it to drain in the background.
+    await reader.cancel().catch(() => undefined);
+  }
+}
 
-    let separator = buffer.indexOf('\n\n');
-    while (separator !== -1) {
-      const rawEvent = buffer.slice(0, separator);
-      buffer = buffer.slice(separator + 2);
-      separator = buffer.indexOf('\n\n');
-      const event = parseSseEvent<TToolCall>(rawEvent);
-      if (!event) continue;
-      dispatchSseEvent(event, callbacks);
+/** iterateSseData + JSON.parse: yields T per frame and skips frames that
+ *  don't parse — one malformed frame never kills the stream; the next
+ *  frame boundary resyncs it. */
+export async function* iterateSseJson<T>(
+  source: Response | ReadableStream<Uint8Array>,
+): AsyncGenerator<T> {
+  for await (const data of iterateSseData(source)) {
+    try {
+      yield JSON.parse(data) as T;
+    } catch {
+      // Unparseable frame — skip it.
     }
   }
 }
