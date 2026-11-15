@@ -90,6 +90,12 @@ The pieces a backend-proxy chat stack needs, all persistence-free:
 - `buildUsageDailySeries` / `usageWindowTotals` / `usageTrendOf` /
   `errorRatePct` — turn sparse SQL day aggregates into zero-filled usage
   series and dashboard math.
+- `deriveConversationTitle(content, { fallback, maxChars })` — first-line
+  title derivation for new conversations (Markdown prefix strip, collapse,
+  truncate).
+- `planStuckRecovery(task, now)` / `STUCK_TASK_THRESHOLD_MS` — recovery
+  decision for queue rows found stale in `running`; sits next to
+  `canStartTask` / `planTaskFailure`.
 
 ## Client-side chat over your own backend
 
