@@ -17,6 +17,13 @@ export {
   asTrimmedOptionalString,
   clampScore,
   oneOfCatalog,
+  asBoolean,
+  asNumber,
+  asInteger,
+  asNonEmptyString,
+  coerceArray,
+  clampNumber,
+  safeParseJson,
 } from "./coercion.util";
 export {
   canFailover,
@@ -29,3 +36,25 @@ export { deriveConversationTitle } from "./title";
 export type { DeriveTitleOptions } from "./title";
 export { createAllowanceWindow, DEFAULT_ALLOWANCE_WINDOW_MS } from "./allowance-window";
 export type { AllowanceWindow, AllowanceWindowOptions } from "./allowance-window";
+export {
+  handleProviderError,
+  classifyGroqError,
+} from "./provider-errors";
+export type {
+  ProviderErrorInput,
+  ProviderErrorDecision,
+  ClassifiedProviderError,
+} from "./provider-errors";
+export {
+  measureLatencyMetrics,
+} from "./latency-metrics";
+export type {
+  LatencyMetric,
+} from "./latency-metrics";
+export {
+  checkUserQuotaAndThrottle,
+} from "./quota-throttler";
+export type {
+  QuotaCheckInput,
+  QuotaCheckResult,
+} from "./quota-throttler";

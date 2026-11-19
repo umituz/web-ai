@@ -206,11 +206,18 @@ export type {
   OpenAiCompatibleConfig,
 } from "./embeddings/openai-embeddings";
 
-export { createOpenAiAudioTranscriptionAdapter } from "./audio/audio-transcription";
+export {
+  createOpenAiAudioTranscriptionAdapter,
+  createGroqAudioTranscriptionAdapter,
+  GROQ_OPENAI_BASE_URL,
+  GROQ_WHISPER_MODELS,
+} from "./audio/audio-transcription";
 export type {
   AudioTranscriptionRequest,
   AudioTranscriptionResult,
   AudioTranscriptionAdapter,
+  GroqWhisperModel,
+  GroqAudioTranscriptionConfig,
 } from "./audio/audio-transcription";
 
 export {

@@ -15,6 +15,20 @@ export interface AudioTranscriptionAdapter {
   transcribe(req: AudioTranscriptionRequest): Promise<AudioTranscriptionResult>;
 }
 
+export const GROQ_OPENAI_BASE_URL = 'https://api.groq.com/openai/v1';
+
+export const GROQ_WHISPER_MODELS = {
+  LARGE_V3: 'whisper-large-v3',
+  LARGE_V3_TURBO: 'whisper-large-v3-turbo',
+} as const;
+
+export type GroqWhisperModel = (typeof GROQ_WHISPER_MODELS)[keyof typeof GROQ_WHISPER_MODELS];
+
+export interface GroqAudioTranscriptionConfig {
+  readonly apiKey: string;
+  readonly timeoutMs?: number;
+}
+
 export function createOpenAiAudioTranscriptionAdapter(
   config: OpenAiCompatibleConfig,
 ): AudioTranscriptionAdapter {
@@ -54,4 +68,14 @@ export function createOpenAiAudioTranscriptionAdapter(
       return { text };
     },
   };
+}
+
+export function createGroqAudioTranscriptionAdapter(
+  config: GroqAudioTranscriptionConfig,
+): AudioTranscriptionAdapter {
+  return createOpenAiAudioTranscriptionAdapter({
+    baseUrl: GROQ_OPENAI_BASE_URL,
+    apiKey: config.apiKey,
+    timeoutMs: config.timeoutMs,
+  });
 }
