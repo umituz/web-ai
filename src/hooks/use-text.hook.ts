@@ -69,7 +69,9 @@ export function useText(
   const [result, setResult] = useState<string | null>(null);
 
   const optionsRef = useRef(options);
-  optionsRef.current = options;
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   const abortControllerRef = useRef<AbortController | null>(null);
 

@@ -37,9 +37,11 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
   const [error, setError] = useState<string | null>(null);
 
   const storageRef = useRef(storage);
-  storageRef.current = storage;
   const callbacksRef = useRef({ onMessageSent, onAIResponse, onError });
-  callbacksRef.current = { onMessageSent, onAIResponse, onError };
+  useEffect(() => {
+    storageRef.current = storage;
+    callbacksRef.current = { onMessageSent, onAIResponse, onError };
+  });
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -120,11 +122,8 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
         type: type ?? "text",
       };
 
-      let contextForAI: ReadonlyArray<ChatMessage> = [];
-      setMessages((prev) => {
-        contextForAI = prev;
-        return [...prev, userMessage];
-      });
+      const contextForAI: ReadonlyArray<ChatMessage> = messages;
+      setMessages((prev) => [...prev, userMessage]);
       void persist(userMessage);
       callbacksRef.current.onMessageSent?.(userMessage);
 
@@ -197,7 +196,7 @@ export function useChat(options: UseChatOptions, deps?: UseChatDeps): UseChatRet
         }
       }
     },
-    [chatService, conversationId, isLoading, persist, streamEnabled, surfaceError],
+    [chatService, conversationId, isLoading, messages, persist, streamEnabled, surfaceError],
   );
 
   const cancel = useCallback(() => {

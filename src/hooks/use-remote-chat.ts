@@ -8,7 +8,7 @@
  * `createRemoteChatClient`; side effects (refetching collections, thread
  * refresh) hang off `onStreamEnd`.
  */
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type {
   RemoteChatClient,
@@ -87,7 +87,9 @@ export function useRemoteChat<TToolCall = unknown>(
   const handleRef = useRef<RemoteStreamHandle | null>(null);
   const stoppedRef = useRef(false);
   const optionsRef = useRef(options);
-  optionsRef.current = options;
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   const patchLast = useCallback((patch: Partial<RemoteChatMessage>) => {
     setMessages((prev) => {

@@ -65,15 +65,14 @@ export function useWizardFlow<T extends string, D extends object>(
 
   const completedRef = useRef(false);
 
-  const navigateTo = useCallback((to: T) => {
-    setCurrentStep((prev) => {
-      if (prev === to) return prev;
-      queueMicrotask(() => {
-        optionsRef.current.onStepChange?.(prev, to);
-      });
-      return to;
-    });
-  }, []);
+  const navigateTo = useCallback(
+    (to: T) => {
+      if (currentStep === to) return;
+      optionsRef.current.onStepChange?.(currentStep, to);
+      setCurrentStep(to);
+    },
+    [currentStep],
+  );
 
   const next = useCallback(() => {
     if (currentIndex < 0 || currentIndex >= steps.length - 1) return;
