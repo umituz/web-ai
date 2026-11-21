@@ -1,0 +1,93 @@
+import type { CSSProperties, ReactNode } from 'react';
+
+export type ChatRole = 'user' | 'assistant' | 'system';
+
+export type ChatMessageStatus = 'sending' | 'sent' | 'error' | 'streaming';
+
+export interface ChatMessageItem {
+  id?: string;
+  role: ChatRole;
+  content: string;
+  createdAt?: string | Date;
+  status?: ChatMessageStatus;
+  tokens?: number;
+  model?: string;
+  error?: string;
+}
+
+export interface SuggestedPromptsProps {
+  prompts: string[];
+  onSelect: (prompt: string) => void;
+  className?: string;
+  style?: CSSProperties;
+  disabled?: boolean;
+}
+
+export interface PromptComposerProps {
+  onSend: (content: string) => void | Promise<void>;
+  onStop?: () => void;
+  loading?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
+  className?: string;
+  style?: CSSProperties;
+  maxLength?: number;
+}
+
+export interface ChatMessageProps {
+  message: ChatMessageItem;
+  showAvatar?: boolean;
+  avatar?: ReactNode;
+  userAvatar?: ReactNode;
+  assistantAvatar?: ReactNode;
+  onCopy?: (content: string) => void;
+  className?: string;
+  style?: CSSProperties;
+}
+
+export interface ChatPaneProps {
+  messages: ChatMessageItem[];
+  loading?: boolean;
+  streamingMessage?: string;
+  onSend: (content: string) => void | Promise<void>;
+  onStop?: () => void;
+  onClear?: () => void;
+  suggestedPrompts?: string[];
+  placeholder?: string;
+  title?: string;
+  subtitle?: string;
+  brandName?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  disabled?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  headerActions?: ReactNode;
+  footerNotice?: ReactNode;
+  userAvatar?: ReactNode;
+  assistantAvatar?: ReactNode;
+}
+
+export interface AIAssistantDrawerProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  subtitle?: string;
+  position?: 'right' | 'left';
+  width?: number | string;
+  chatProps: Omit<ChatPaneProps, 'title' | 'subtitle'>;
+  className?: string;
+  style?: CSSProperties;
+}
+
+export interface AIAssistantModalProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  maxWidth?: number | string;
+  chatProps: Omit<ChatPaneProps, 'title' | 'subtitle'>;
+  className?: string;
+  style?: CSSProperties;
+}

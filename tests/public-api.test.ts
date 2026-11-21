@@ -6,6 +6,7 @@ import * as chat from "../src/chat";
 import * as content from "../src/content";
 import * as wizard from "../src/wizard";
 import * as hooks from "../src/hooks";
+import * as presentation from "../src/presentation";
 import type { ConversationMessage } from "../src/index";
 import type { ChatMessage } from "../src/chat";
 import type { ContentGenerationResult } from "../src/content";
@@ -256,6 +257,19 @@ describe("public API — @umituz/web-ai", () => {
       "REMOTE_CHAT_STREAMING_ID",
       "calculateCreditCost",
       "GENERATION_COSTS",
+    ]);
+  });
+
+  it("presentation: React UI components for Chat, Composer, Drawer, Modal", () => {
+    expectExports(presentation, [
+      "ChatPane",
+      "ChatMessage",
+      "PromptComposer",
+      "SuggestedPrompts",
+      "AIAssistantDrawer",
+      "AIAssistantModal",
+      "MarkdownView",
+      "ChatVisualTokens",
     ]);
   });
 

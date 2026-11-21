@@ -15,6 +15,7 @@ export default defineConfig({
     "content/index": "src/content/index.ts",
     "wizard/index": "src/wizard/index.ts",
     "hooks/index": "src/hooks/index.ts",
+    "presentation/index": "src/presentation/index.ts",
   },
   format: ["cjs", "esm"],
   dts: true,
