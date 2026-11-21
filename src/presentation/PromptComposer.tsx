@@ -5,7 +5,8 @@ import type { PromptComposerProps } from './types';
 export function PromptComposer({
   onSend,
   onStop,
-  loading = false,
+  loading: loadingProp,
+  isLoading,
   placeholder = 'Ask anything...',
   disabled = false,
   value,
@@ -14,6 +15,7 @@ export function PromptComposer({
   style,
   maxLength = 4000,
 }: PromptComposerProps) {
+  const loading = loadingProp ?? isLoading ?? false;
   const [internalValue, setInternalValue] = useState('');
   const text = value !== undefined ? value : internalValue;
   const textareaRef = useRef<HTMLTextAreaElement>(null);

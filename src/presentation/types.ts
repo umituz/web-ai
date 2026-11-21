@@ -16,7 +16,7 @@ export interface ChatMessageItem {
 }
 
 export interface SuggestedPromptsProps {
-  prompts: string[];
+  prompts: readonly string[] | string[];
   onSelect: (prompt: string) => void;
   className?: string;
   style?: CSSProperties;
@@ -27,6 +27,7 @@ export interface PromptComposerProps {
   onSend: (content: string) => void | Promise<void>;
   onStop?: () => void;
   loading?: boolean;
+  isLoading?: boolean;
   placeholder?: string;
   disabled?: boolean;
   value?: string;
@@ -50,11 +51,12 @@ export interface ChatMessageProps {
 export interface ChatPaneProps {
   messages: ChatMessageItem[];
   loading?: boolean;
+  isLoading?: boolean;
   streamingMessage?: string;
   onSend: (content: string) => void | Promise<void>;
   onStop?: () => void;
   onClear?: () => void;
-  suggestedPrompts?: string[];
+  suggestedPrompts?: readonly string[] | string[];
   placeholder?: string;
   title?: string;
   subtitle?: string;

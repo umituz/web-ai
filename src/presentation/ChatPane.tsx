@@ -7,7 +7,8 @@ import type { ChatPaneProps } from './types';
 
 export function ChatPane({
   messages = [],
-  loading = false,
+  loading: loadingProp,
+  isLoading,
   streamingMessage,
   onSend,
   onStop,
@@ -27,6 +28,7 @@ export function ChatPane({
   userAvatar,
   assistantAvatar,
 }: ChatPaneProps) {
+  const loading = loadingProp ?? isLoading ?? false;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
 
