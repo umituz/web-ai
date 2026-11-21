@@ -8,6 +8,8 @@ import {
   AIAssistantDrawer,
   AIAssistantModal,
   MarkdownView,
+  ReasoningBlock,
+  ToolCallCard,
 } from '../../src/presentation';
 
 describe('ChatPane presentation components', () => {
@@ -182,5 +184,100 @@ describe('ChatPane presentation components', () => {
     expect(html).toContain('Second item');
     expect(html).toContain('const x = 42;');
     expect(html).toContain('typescript');
+  });
+
+  it('renders ReasoningBlock with thinking and reasoning states', () => {
+    const streamingHtml = renderToStaticMarkup(
+      <ReasoningBlock reasoning="" streaming={true} />
+    );
+    expect(streamingHtml).toContain('Thinking...');
+
+    const openHtml = renderToStaticMarkup(
+      <ReasoningBlock
+        reasoning="Step 1: calculate derivative\nStep 2: integrate"
+        defaultOpen={true}
+      />
+    );
+    expect(openHtml).toContain('Thought Process');
+    expect(openHtml).toContain('calculate derivative');
+
+    const emptyClosedHtml = renderToStaticMarkup(
+      <ReasoningBlock reasoning="" streaming={false} />
+    );
+    expect(emptyClosedHtml).toBe('');
+  });
+
+  it('renders ChatMessage with reasoning block when provided', () => {
+    const html = renderToStaticMarkup(
+      <ChatMessage
+        message={{
+          role: 'assistant',
+          content: 'The answer is 42.',
+          reasoning: 'Deep contemplation occurred.',
+          status: 'sent',
+        }}
+      />
+    );
+
+    expect(html).toContain('The answer is 42.');
+    expect(html).toContain('Thought Process');
+  });
+
+  it('renders ToolCallCard with status badges and approve/reject actions', () => {
+    const pendingHtml = renderToStaticMarkup(
+      <ToolCallCard
+        toolCall={{
+          id: 'call_123',
+          toolName: 'generate_image',
+          args: { prompt: 'futuristic skyline' },
+          status: 'pending',
+        }}
+        onResolve={() => {}}
+      />
+    );
+
+    expect(pendingHtml).toContain('generate_image');
+    expect(pendingHtml).toContain('pending');
+    expect(pendingHtml).toContain('futuristic skyline');
+    expect(pendingHtml).toContain('Approve');
+    expect(pendingHtml).toContain('Reject');
+
+    const succeededHtml = renderToStaticMarkup(
+      <ToolCallCard
+        toolCall={{
+          id: 'call_456',
+          toolName: 'web_search',
+          args: { query: 'TypeScript 5.8 features' },
+          status: 'succeeded',
+          result: { results: ['https://typescriptlang.org'] },
+        }}
+      />
+    );
+
+    expect(succeededHtml).toContain('web_search');
+    expect(succeededHtml).toContain('succeeded');
+    expect(succeededHtml).toContain('https://typescriptlang.org');
+    expect(succeededHtml).not.toContain('Approve');
+  });
+
+  it('renders ChatPane with toolCalls', () => {
+    const html = renderToStaticMarkup(
+      <ChatPane
+        messages={[{ role: 'assistant', content: 'Calling tool now...' }]}
+        toolCalls={[
+          {
+            id: 'call_abc',
+            toolName: 'query_database',
+            args: { table: 'users' },
+            status: 'approved',
+          },
+        ]}
+        onSend={() => {}}
+      />
+    );
+
+    expect(html).toContain('Calling tool now...');
+    expect(html).toContain('query_database');
+    expect(html).toContain('approved');
   });
 });

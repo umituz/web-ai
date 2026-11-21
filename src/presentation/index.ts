@@ -5,6 +5,8 @@ export * from './MarkdownView';
 export * from './SuggestedPrompts';
 export * from './PromptComposer';
 export * from './ChatMessage';
+export * from './ReasoningBlock';
+export * from './ToolCallCard';
 export * from './ChatPane';
 export * from './AIAssistantDrawer';
 export * from './AIAssistantModal';

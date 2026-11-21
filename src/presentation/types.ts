@@ -8,11 +8,40 @@ export interface ChatMessageItem {
   id?: string;
   role: ChatRole;
   content: string;
+  reasoning?: string;
   createdAt?: string | Date;
   status?: ChatMessageStatus;
   tokens?: number;
   model?: string;
   error?: string;
+}
+
+export interface ReasoningBlockProps {
+  reasoning: string;
+  streaming?: boolean;
+  label?: string;
+  thinkingLabel?: string;
+  className?: string;
+  style?: CSSProperties;
+  defaultOpen?: boolean;
+}
+
+export interface ToolCallItem {
+  id: string;
+  toolKey?: string;
+  toolName: string;
+  args: Record<string, unknown> | string;
+  status: 'pending' | 'approved' | 'rejected' | 'succeeded' | 'failed';
+  result?: unknown;
+  error?: string;
+}
+
+export interface ToolCallCardProps {
+  toolCall: ToolCallItem;
+  onResolve?: (id: string, approved: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  style?: CSSProperties;
 }
 
 export interface SuggestedPromptsProps {
@@ -50,6 +79,8 @@ export interface ChatMessageProps {
 
 export interface ChatPaneProps {
   messages: ChatMessageItem[];
+  toolCalls?: ToolCallItem[];
+  onResolveToolCall?: (id: string, approved: boolean) => void;
   loading?: boolean;
   isLoading?: boolean;
   streamingMessage?: string;

@@ -3,10 +3,13 @@ import { ChatMessage } from './ChatMessage';
 import { IconArrowDown, IconBot, IconSparkles, IconTrash } from './icons';
 import { PromptComposer } from './PromptComposer';
 import { SuggestedPrompts } from './SuggestedPrompts';
+import { ToolCallCard } from './ToolCallCard';
 import type { ChatPaneProps } from './types';
 
 export function ChatPane({
   messages = [],
+  toolCalls = [],
+  onResolveToolCall,
   loading: loadingProp,
   isLoading,
   streamingMessage,
@@ -52,7 +55,7 @@ export function ChatPane({
 
   useEffect(() => {
     scrollToBottom(true);
-  }, [messages.length, streamingMessage, loading]);
+  }, [messages.length, toolCalls.length, streamingMessage, loading]);
 
   const resolvedEmptyTitle = emptyTitle || `How can I help you today${brandName ? ` with ${brandName}` : ''}?`;
   const resolvedEmptyDescription = emptyDescription || 'Ask questions, draft content, summarize records, or pick a suggested topic below.';
@@ -215,6 +218,19 @@ export function ChatPane({
                 }}
                 assistantAvatar={assistantAvatar}
               />
+            )}
+
+            {toolCalls.length > 0 && (
+              <div style={{ margin: '8px 0' }}>
+                {toolCalls.map((tc) => (
+                  <ToolCallCard
+                    key={tc.id}
+                    toolCall={tc}
+                    onResolve={onResolveToolCall}
+                    disabled={disabled || loading}
+                  />
+                ))}
+              </div>
             )}
 
             {loading && !streamingMessage && (

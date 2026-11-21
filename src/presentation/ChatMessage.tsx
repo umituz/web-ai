@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { IconBot, IconCheck, IconCopy, IconUser } from './icons';
 import { MarkdownView } from './MarkdownView';
+import { ReasoningBlock } from './ReasoningBlock';
 import type { ChatMessageProps } from './types';
 
 export function ChatMessage({
@@ -94,6 +95,12 @@ export function ChatMessage({
             boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
           }}
         >
+          {!isUser && message.reasoning ? (
+            <ReasoningBlock
+              reasoning={message.reasoning}
+              streaming={message.status === 'streaming'}
+            />
+          ) : null}
           {isUser ? (
             <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{message.content}</div>
           ) : (
