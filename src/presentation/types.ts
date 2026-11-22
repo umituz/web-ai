@@ -33,7 +33,7 @@ export interface ToolCallItem {
   args: Record<string, unknown> | string;
   status: 'pending' | 'approved' | 'rejected' | 'succeeded' | 'failed';
   result?: unknown;
-  error?: string;
+  error?: string | null;
 }
 
 export interface ToolCallCardProps {
