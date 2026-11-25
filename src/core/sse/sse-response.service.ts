@@ -15,7 +15,7 @@ export interface SseResponseOptions {
   readonly donePayload: unknown;
   readonly errorCode: (error: unknown) => string;
   readonly onStreamFailure?: (error: unknown) => Promise<void> | void;
-  /** Provider-specific: pulls the displayable text delta out of an SSE payload. Defaults to standard choices[0].delta.content extractor. */
+  readonly onComplete?: (assistantText: string) => Promise<void> | void;
   readonly extractDelta?: SseDeltaExtractor;
 }
 
@@ -34,6 +34,67 @@ export function defaultSseDeltaExtractor(payload: string): string | null {
   } catch {
     return null;
   }
+}
+
+export async function withCompletionTap(
+  openUpstream: () => Promise<ReadableStream<Uint8Array>>,
+  onComplete?: (assistantText: string) => void | Promise<void>,
+  extractDelta: SseDeltaExtractor = defaultSseDeltaExtractor,
+): Promise<ReadableStream<Uint8Array>> {
+  if (!onComplete) return openUpstream();
+  const reader = (await openUpstream()).getReader();
+  const decoder = new TextDecoder();
+  let pending = "";
+  let assistantText = "";
+
+  const tapLine = (line: string): void => {
+    const match = /^data:(.*)$/.exec(line);
+    if (!match) return;
+    const payload = match[1]?.trim();
+    if (!payload || payload === "[DONE]") return;
+    const delta = extractDelta(payload);
+    if (typeof delta === "string") assistantText += delta;
+  };
+
+  const tap = (text: string, flush: boolean): void => {
+    pending += text;
+    for (;;) {
+      const newlineIndex = pending.indexOf("\n");
+      if (newlineIndex === -1) break;
+      const line = pending.slice(0, newlineIndex);
+      pending = pending.slice(newlineIndex + 1);
+      tapLine(line);
+    }
+    if (flush && pending.length > 0) {
+      tapLine(pending);
+      pending = "";
+    }
+  };
+
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          tap(decoder.decode(), true);
+          try {
+            await onComplete(assistantText);
+          } catch (err) {
+            console.warn("withCompletionTap onComplete failed:", err);
+          }
+          controller.close();
+          return;
+        }
+        tap(decoder.decode(value, { stream: true }), false);
+        controller.enqueue(value);
+      } catch (err) {
+        controller.error(err);
+      }
+    },
+    async cancel(reason) {
+      await reader.cancel(reason);
+    },
+  });
 }
 
 export function createSseResponse(
@@ -66,6 +127,7 @@ export function createSseResponse(
         }
       };
       let delivered = false;
+      let accumulatedText = "";
       const consumeLine = (line: string): boolean => {
         const trimmed = line.trim();
         if (!isSseDataLine(trimmed)) return false;
@@ -74,6 +136,7 @@ export function createSseResponse(
         const text = extractDelta(payload);
         if (text) {
           delivered = true;
+          accumulatedText += text;
           emit(SSE_BRIDGE_EVENTS.delta, { text });
         }
         return false;
@@ -95,6 +158,13 @@ export function createSseResponse(
           }
         }
         if (!finished && buffer.length > 0) consumeLine(buffer);
+        if (options.onComplete) {
+          try {
+            await options.onComplete(accumulatedText);
+          } catch (hookErr) {
+            console.warn("onComplete callback failed:", hookErr);
+          }
+        }
         emit(SSE_BRIDGE_EVENTS.done, options.donePayload);
         finish();
       } catch (err) {

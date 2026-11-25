@@ -19,6 +19,30 @@ export function estimateTokens(text: string): number {
   return Math.ceil(text.length / CHARS_PER_TOKEN);
 }
 
+export function estimateMultilingualTokens(text: string): number {
+  if (!text) return 0;
+  let tokens = 0;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (
+      (code >= 0xac00 && code <= 0xd7af) ||
+      (code >= 0x4e00 && code <= 0x9fff) ||
+      (code >= 0x3040 && code <= 0x30ff)
+    ) {
+      tokens += 1.5;
+    } else if (
+      (code >= 0x0600 && code <= 0x06ff) ||
+      (code >= 0x0400 && code <= 0x04ff) ||
+      (code >= 0x0e00 && code <= 0x0e7f)
+    ) {
+      tokens += 0.8;
+    } else {
+      tokens += 0.25;
+    }
+  }
+  return Math.ceil(tokens);
+}
+
 export function estimateMessageTokens(message: ContextMessage): number {
   const toolStructure =
     message.toolCalls && message.toolCalls.length > 0

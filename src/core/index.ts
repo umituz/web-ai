@@ -10,6 +10,7 @@ export {
   buildContext,
   estimateTokens,
   estimateMessageTokens,
+  estimateMultilingualTokens,
 } from "./context/context-manager";
 export type {
   ContextBudget,
@@ -21,6 +22,8 @@ export {
   SYSTEM_PROMPT_VERSION,
   DEFAULT_AI_IDENTITY,
 } from "./prompt/prompt-engine";
+export { interpolatePrompt } from "./prompt/prompt-template";
+export type { InterpolateOptions } from "./prompt/prompt-template";
 export type {
   SystemPromptInput,
   ProjectContext,
