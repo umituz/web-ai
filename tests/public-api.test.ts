@@ -68,6 +68,8 @@ describe("public API — @umituz/web-ai", () => {
       "runWorkersAIText",
       "streamWorkersAIText",
       "workersAIConfigured",
+      "createWorkersAIChatAdapter",
+      "WORKERS_AI_CONTEXT_WINDOW",
       "speakWithWorkersAI",
       "createFalQueue",
       "falQueueConfigured",

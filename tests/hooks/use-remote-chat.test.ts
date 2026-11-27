@@ -194,4 +194,27 @@ describe("useRemoteChat", () => {
     const messages = result.current.messages as RemoteChatMessage[];
     expect(messages.at(-1)).toMatchObject({ id: "b", status: "stopped", content: "halted" });
   });
+
+  it("turnMode append keeps loaded history while the new turn streams", async () => {
+    const client = mockClient(async (cb) => {
+      cb.onDelta("answer", "Second answer");
+      cb.onDone?.("msg_2");
+    });
+    const { result } = renderHook(() => useRemoteChat({ client, turnMode: "append" }));
+
+    act(() => {
+      result.current.setMessages([
+        { id: "m0", role: "user", content: "First question", reasoning: "", status: "complete", error: null, usage: null },
+        { id: "msg_1", role: "assistant", content: "First answer", reasoning: "", status: "complete", error: null, usage: null },
+      ]);
+    });
+
+    await act(async () => {
+      await result.current.stream("c1", { content: "Second question" }, { localUserContent: "Second question" });
+    });
+
+    const messages = result.current.messages as RemoteChatMessage[];
+    expect(messages.map((m) => m.id.slice(0, 5))).toEqual(["m0", "msg_1", "local", "msg_2"]);
+    expect(messages.at(-1)).toMatchObject({ role: "assistant", status: "complete", content: "Second answer" });
+  });
 });

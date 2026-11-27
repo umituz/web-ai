@@ -50,6 +50,13 @@ export interface UseRemoteChatOptions<TToolCall = unknown> {
   }) => void | Promise<void>;
   /** Id factory for the optimistic user echo. */
   readonly localUserId?: () => string;
+  /**
+   * `replace` (default) mounts each turn on a fresh list — the hook owns
+   * the whole message array. `append` keeps the existing messages (loaded
+   * history) and appends the new turn, so a drawer can stream into a
+   * conversation it already shows without refetching mid-turn.
+   */
+  readonly turnMode?: "replace" | "append";
 }
 
 export interface UseRemoteChatReturn {
@@ -135,7 +142,7 @@ export function useRemoteChat<TToolCall = unknown>(
     ): Promise<void> => {
       setIsStreaming(true);
       stoppedRef.current = false;
-      setMessages(() => [
+      const turn: RemoteChatMessage[] = [
         ...(opts?.localUserContent !== undefined
           ? [
               {
@@ -150,7 +157,10 @@ export function useRemoteChat<TToolCall = unknown>(
             ]
           : []),
         placeholder(REMOTE_CHAT_STREAMING_ID, "streaming"),
-      ]);
+      ];
+      setMessages((prev) =>
+        optionsRef.current.turnMode === "append" ? [...prev, ...turn] : turn,
+      );
 
       const handle = client.streamChat(conversationId, body, callbacks());
       handleRef.current = handle;

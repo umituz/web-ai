@@ -80,6 +80,11 @@ The pieces a backend-proxy chat stack needs, all persistence-free:
   `ChatAdapter`s, per-attempt context windowing (`buildContext`), answer /
   reasoning / usage / tool-call reduction, abort → `stopped`. Yield events and
   persist them your way.
+- `createWorkersAIChatAdapter(binding)` — the `env.AI` binding as a
+  `ChatAdapter`, so zero-key Cloudflare Workers AI joins `runConversation`
+  attempt chains next to Anthropic/Groq (text-only; tools fold to plain text).
+  `WORKERS_AI_CONTEXT_WINDOW` carries the conservative window for
+  `buildContext` windowing.
 - `sseStreamResponse(events)` / `replayFirst` — wrap the generator into an SSE
   `Response` (Workers/hono compatible).
 - `createAdapterResolver(env)` — provider binding (`{ adapter, baseUrl,
@@ -103,6 +108,9 @@ The pieces a backend-proxy chat stack needs, all persistence-free:
 SSE stream (`streamChat`, `resolveToolCall`); `useRemoteChat({ client })`
 owns the message-list state machine — optimistic user echo, streaming
 placeholder, delta/usage/error/done patches, tool approval, abort tracking.
+Default `turnMode: 'replace'` mounts each turn on a fresh list; pass
+`turnMode: 'append'` to stream into a conversation whose history is already
+loaded — the new turn appends instead of wiping it.
 
 ## Migration from the old packages
 

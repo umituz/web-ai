@@ -130,6 +130,12 @@ export {
 } from "./workers-ai/workers-ai.text";
 export type { WorkersAITextOptions } from "./workers-ai/workers-ai.text";
 export {
+  createWorkersAIChatAdapter,
+  WORKERS_AI_CHAT_TIMEOUT_MS,
+  WORKERS_AI_CONTEXT_WINDOW,
+} from "./adapters/workers-ai.adapter";
+export type { WorkersAIChatAdapterOptions } from "./adapters/workers-ai.adapter";
+export {
   speakWithWorkersAI,
 } from "./workers-ai/workers-ai.speech";
 export type {
